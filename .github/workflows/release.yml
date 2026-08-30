@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - "v*"
-    branches:
-      - main
 
 permissions:
   contents: write
@@ -13,7 +11,6 @@ permissions:
 
 jobs:
   release:
-    if: "${{ github.ref_type == 'tag' || github.event.head_commit.message == 'release-v1.0.0' }}"
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 60
     steps:
@@ -24,21 +21,15 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Resolve release tag and verify package version
+      - name: Verify tag matches package version
         shell: bash
         run: |
           set -euo pipefail
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
           PACKAGE_VERSION="$(node -p "require('./package.json').version")"
-          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            RELEASE_TAG="${GITHUB_REF_NAME}"
-            TAG_VERSION="${RELEASE_TAG#v}"
-            test "${TAG_VERSION}" = "${PACKAGE_VERSION}"
-          else
-            RELEASE_TAG="v${PACKAGE_VERSION}"
-          fi
-          echo "RELEASE_TAG=${RELEASE_TAG}" >> "$GITHUB_ENV"
-          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_ENV"
-          echo "release tag: ${RELEASE_TAG}"
+          echo "tag version:     ${TAG_VERSION}"
+          echo "package version: ${PACKAGE_VERSION}"
+          test "${TAG_VERSION}" = "${PACKAGE_VERSION}"
 
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
@@ -87,25 +78,17 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/corelinkplatform/identity:${{ env.RELEASE_TAG }}
+            ghcr.io/corelinkplatform/identity:${{ github.ref_name }}
             ghcr.io/corelinkplatform/identity:latest
           labels: |
             org.opencontainers.image.source=https://github.com/CoreLinkPlatform/Identity
-            org.opencontainers.image.version=${{ env.RELEASE_TAG }}
+            org.opencontainers.image.version=${{ github.ref_name }}
             org.opencontainers.image.title=CoreLink Identity
             org.opencontainers.image.licenses=MIT
           provenance: mode=max
           sbom: true
 
-      - name: Create GitHub Release and tag
+      - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "Release $RELEASE_TAG already exists"
-          else
-            gh release create "$RELEASE_TAG" dist_keycloak/*.jar SHA256SUMS \
-              --target "$GITHUB_SHA" \
-              --generate-notes \
-              --title "CoreLink Identity $RELEASE_TAG"
-          fi
+        run: gh release create "${GITHUB_REF_NAME}" dist_keycloak/*.jar SHA256SUMS --generate-notes --title "CoreLink Identity ${GITHUB_REF_NAME}"
