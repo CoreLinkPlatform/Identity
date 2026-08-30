@@ -6,13 +6,20 @@
 
 ### نیازمندی‌ها
 
-- Keycloak نسخه 26.2 یا بالاتر.
+- یک نسخه پشتیبانی‌شده از Keycloak.
 - دسترسی به مسیر `providers` در Keycloak.
 - امکان rebuild/restart کردن Keycloak.
 
-### مراحل
+### فایل‌های سازگاری
 
-1. از بخش Releases فایل `corelink-26.2-and-above.jar` و `SHA256SUMS` را دانلود کنید.
+Keycloakify در حال حاضر دو JAR می‌سازد:
+
+- `keycloak-theme-for-kc-22-to-25.jar` برای Keycloak نسخه‌های 22 تا 25.
+- `keycloak-theme-for-kc-all-other-versions.jar` برای سایر نسخه‌های پشتیبانی‌شده، از جمله baseline فعلی Keycloak 26.x.
+
+### مراحل برای baseline فعلی Keycloak 26.x
+
+1. از بخش Releases فایل `keycloak-theme-for-kc-all-other-versions.jar` و `SHA256SUMS` را دانلود کنید.
 2. صحت فایل را بررسی کنید:
 
 ```bash
@@ -22,7 +29,7 @@ sha256sum -c SHA256SUMS
 3. فایل JAR را داخل Keycloak کپی کنید:
 
 ```bash
-cp corelink-26.2-and-above.jar /opt/keycloak/providers/corelink-theme.jar
+cp keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/corelink-theme.jar
 ```
 
 4. Keycloak را rebuild کنید:
@@ -46,7 +53,7 @@ Realm settings → Themes → Login theme → corelink
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:26.7.2 AS builder
-COPY corelink-26.2-and-above.jar /opt/keycloak/providers/corelink-theme.jar
+COPY keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/corelink-theme.jar
 RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:26.7.2
@@ -58,7 +65,7 @@ CMD ["start", "--optimized"]
 ## ۲. اجرای Docker image آماده GHCR
 
 ```bash
-docker pull ghcr.io/corelinkplatform/identity:v0.1.0
+docker pull ghcr.io/corelinkplatform/identity:v1.0.0
 ```
 
 برای تست محلی:
@@ -67,7 +74,7 @@ docker pull ghcr.io/corelinkplatform/identity:v0.1.0
 docker run --rm -p 8080:8080 \
   -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
   -e KC_BOOTSTRAP_ADMIN_PASSWORD=change-me \
-  ghcr.io/corelinkplatform/identity:v0.1.0 \
+  ghcr.io/corelinkplatform/identity:v1.0.0 \
   start-dev
 ```
 
@@ -80,15 +87,11 @@ docker run --rm -p 8080:8080 \
 ```bash
 git clone https://github.com/CoreLinkPlatform/Identity.git
 cd Identity
-npm install
+npm ci
 npm run build:keycloak
 ```
 
-خروجی:
-
-```text
-dist_keycloak/corelink-26.2-and-above.jar
-```
+خروجی‌های JAR داخل `dist_keycloak/` ساخته می‌شوند.
 
 ## ۴. ساخت fork با برند اختصاصی
 
