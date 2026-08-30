@@ -36,35 +36,27 @@ jobs:
 
       - name: Install dependencies
         id: install
-        continue-on-error: true
         run: |
           set -o pipefail
           npm install 2>&1 | tee ci-install.log
 
       - name: Typecheck and web build
         id: check
-        if: steps.install.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           npm run check 2>&1 | tee ci-check.log
 
       - name: Build Keycloak theme
         id: theme
-        if: steps.install.outcome == 'success' && steps.check.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           npm run build:keycloak 2>&1 | tee ci-theme.log
 
       - name: Inspect Keycloak build output
-        if: steps.theme.outcome == 'success'
         run: find dist_keycloak -maxdepth 2 -type f -print
 
       - name: Validate production Docker image
         id: docker
-        if: steps.theme.outcome == 'success'
-        continue-on-error: true
         run: |
           set -o pipefail
           docker build --pull -t corelink-identity:ci . 2>&1 | tee ci-docker.log
@@ -82,13 +74,9 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload theme JAR
-        if: steps.theme.outcome == 'success'
+        if: success()
         uses: actions/upload-artifact@v7.0.1
         with:
           name: corelink-keycloak-theme
           path: dist_keycloak/*.jar
           if-no-files-found: error
-
-      - name: Fail if validation failed
-        if: steps.install.outcome != 'success' || steps.check.outcome != 'success' || steps.theme.outcome != 'success' || steps.docker.outcome != 'success'
-        run: exit 1
