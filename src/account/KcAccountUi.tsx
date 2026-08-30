@@ -11,10 +11,30 @@ import { SessionExpirationWarningOverlay } from "../shared/SessionExpirationWarn
 import "./corelink-account.css";
 
 const brandName = import.meta.env.VITE_BRAND_NAME || "CoreLink";
+const defaultBrandMarkPath = import.meta.env.VITE_BRAND_MARK || "img/corelink-mark.svg";
+const brandMarkUrl = `${import.meta.env.BASE_URL}${defaultBrandMarkPath}`;
 document.title = `${brandName} Account`;
 
 const prI18nInitialized = i18n.init();
 startColorSchemeManagement();
+
+function CoreLinkLoader() {
+  const language = document.documentElement.lang || navigator.language || "en";
+  const isFa = /^fa(-|$)/i.test(language);
+
+  return (
+    <div className="corelink-surface-loader" role="status" aria-live="polite">
+      <div className="corelink-surface-loader__card">
+        <img className="corelink-surface-loader__mark" src={brandMarkUrl} alt="" />
+        <div className="corelink-surface-loader__title">{brandName} Identity</div>
+        <div className="corelink-surface-loader__bar" aria-hidden="true" />
+        <div className="corelink-surface-loader__hint">
+          {isFa ? "در حال آماده‌سازی حساب امن شما…" : "Preparing your secure account…"}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function KcAccountUi() {
   const [isI18nInitialized, setI18nInitialized] = useReducer(() => true, false);
@@ -32,7 +52,7 @@ export default function KcAccountUi() {
   });
 
   if (!isI18nInitialized) {
-    return null;
+    return <CoreLinkLoader />;
   }
 
   return (
