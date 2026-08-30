@@ -1,5 +1,5 @@
 {
-  "name": "@corelinkplatform/identity",
+  "name": "corelink",
   "version": "0.1.0",
   "private": true,
   "description": "Reusable Keycloak identity theme with CoreLink defaults",
