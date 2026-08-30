@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies reproducibly
         run: npm ci
 
+      - name: Restore and verify CoreLink extension overrides
+        run: npm run prepare:extensions
+
       - name: Validate source and generated overrides
         run: npm run check
 
