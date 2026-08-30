@@ -2,6 +2,16 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { spawnSync } from "node:child_process";
 
+/*
+ * keycloakify sync-extensions may run npm install when extension dependencies
+ * change. npm then executes this project's postinstall hook again. Guard that
+ * nested invocation so synchronization happens exactly once per install.
+ */
+if (process.env.CORELINK_SYNC_IN_PROGRESS === "1") {
+  console.log("Skipping nested Keycloakify extension sync.");
+  process.exit(0);
+}
+
 const ownedFiles = [
   "src/admin/KcPage.tsx",
   "src/admin/KcAdminUi.tsx",
@@ -26,7 +36,11 @@ for (const path of ownedFiles) {
 
 const result = spawnSync("keycloakify", ["sync-extensions"], {
   stdio: "inherit",
-  shell: process.platform === "win32"
+  shell: process.platform === "win32",
+  env: {
+    ...process.env,
+    CORELINK_SYNC_IN_PROGRESS: "1"
+  }
 });
 
 if (result.error) {
