@@ -1,10 +1,6 @@
 name: Maven Central
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/maven-central.yml"
   workflow_dispatch:
     inputs:
       ref:
@@ -21,8 +17,8 @@ on:
           - AUTOMATIC
 
 env:
-  RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'v0.1.0' }}
-  PUBLISHING_TYPE: ${{ github.event_name == 'workflow_dispatch' && inputs.publishing_type || 'USER_MANAGED' }}
+  RELEASE_REF: ${{ inputs.ref }}
+  PUBLISHING_TYPE: ${{ inputs.publishing_type }}
 
 permissions:
   contents: read
