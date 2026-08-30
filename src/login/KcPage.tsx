@@ -4,6 +4,7 @@ import Template from "keycloakify/login/Template";
 import type { KcContext } from "./KcContext";
 import { InteractiveBackground } from "./InteractiveBackground";
 import { useI18n } from "./i18n";
+import "@fontsource-variable/vazirmatn/wght.css";
 import "./InteractiveBackground.css";
 
 const UserProfileFormFields = lazy(() => import("keycloakify/login/UserProfileFormFields"));
@@ -13,6 +14,10 @@ const brandTagline = import.meta.env.VITE_BRAND_TAGLINE || "Secure connected int
 const brandMark = import.meta.env.VITE_BRAND_MARK || "img/corelink-mark.svg";
 const backgroundImage = import.meta.env.VITE_IDENTITY_BACKGROUND || "img/identity-topography.webp";
 
+function publicAsset(path: string) {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, "")}`;
+}
+
 export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   const { i18n } = useI18n({ kcContext });
   const lang = i18n.currentLanguage.languageTag;
@@ -21,14 +26,16 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? "rtl" : "ltr";
+    document.body.dir = isRtl ? "rtl" : "ltr";
     document.body.dataset.identityPage = kcContext.pageId;
+    document.body.dataset.identityDirection = isRtl ? "rtl" : "ltr";
   }, [lang, isRtl, kcContext.pageId]);
 
   return (
     <Suspense>
-      <InteractiveBackground imageUrl={`${kcContext.url.resourcesPath}/${backgroundImage}`} />
+      <InteractiveBackground imageUrl={publicAsset(backgroundImage)} />
       <div className="corelink-brand-bar">
-        <img src={`${kcContext.url.resourcesPath}/${brandMark}`} alt={`${brandName} logo`} />
+        <img src={publicAsset(brandMark)} alt={`${brandName} logo`} />
         <span>{brandName}</span>
       </div>
       <DefaultPage
