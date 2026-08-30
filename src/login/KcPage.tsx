@@ -88,7 +88,7 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
                 {locales.map(locale => (
                   <a
                     key={locale.languageTag}
-                    href={locale.href}
+                    href={locale.url}
                     className={locale.languageTag === lang ? "is-active" : undefined}
                     lang={locale.languageTag}
                     hrefLang={locale.languageTag}
