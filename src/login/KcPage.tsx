@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties, type SyntheticEvent } from "react";
+import { lazy, Suspense, useLayoutEffect, useMemo, useState, type CSSProperties, type SyntheticEvent } from "react";
 import DefaultPage from "keycloakify/login/DefaultPage";
 import Template from "keycloakify/login/Template";
 import type { KcContext } from "./KcContext";
@@ -29,6 +29,28 @@ type Brand = {
   primaryColor?: string;
   accentColor?: string;
 };
+
+type HeroCopy = {
+  eyebrow: string;
+  headline: string;
+  description: string;
+  chip: string;
+  featureOne: string;
+  featureTwo: string;
+  featureThree: string;
+  lightMode: string;
+  darkMode: string;
+};
+
+const rtlLanguages = new Set(["ar", "fa", "he", "ur"]);
+
+function getLanguageCode(languageTag: string): string {
+  return languageTag.toLowerCase().split("-")[0] ?? languageTag.toLowerCase();
+}
+
+function isRtlLanguage(languageTag: string): boolean {
+  return rtlLanguages.has(getLanguageCode(languageTag));
+}
 
 function getInitialColorMode(): ColorMode {
   if (typeof window === "undefined") {
@@ -106,6 +128,132 @@ function readBrand(kcContext: KcContext): Brand {
   };
 }
 
+function readLocalizedValue(
+  attributes: Record<string, string>,
+  properties: Record<string, string>,
+  attributeKey: string,
+  propertyKey: string,
+  languageTag: string,
+  fallback: string
+): string {
+  const languageCode = getLanguageCode(languageTag);
+  const normalizedLanguage = languageCode.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+
+  return (
+    firstNonBlank(
+      attributes[`${attributeKey}.${languageCode}`],
+      attributes[attributeKey],
+      properties[`${propertyKey}_${normalizedLanguage}`],
+      properties[propertyKey]
+    ) ?? fallback
+  );
+}
+
+function readHeroCopy(kcContext: KcContext, languageTag: string, brand: Brand): HeroCopy {
+  const attributes = (kcContext.realm as RealmWithAttributes).attributes ?? {};
+  const properties = (kcContext as ContextWithProperties).properties ?? {};
+  const rtl = isRtlLanguage(languageTag);
+
+  const defaults = rtl
+    ? {
+        headline: "همه چیزهایی که برایتان مهم است را یک‌جا ببینید.",
+        description:
+          "خودروها، حیوانات، تجهیزات و مکان‌ها را روی نقشه دنبال کنید، وضعیتشان را ببینید و از اتفاق‌های مهم باخبر شوید.",
+        chip: "موقعیت، وضعیت و هشدارها در یک نگاه",
+        featureOne: "ورود امن",
+        featureTwo: "نقشه زنده",
+        featureThree: "هشدارهای هوشمند",
+        lightMode: "حالت روشن",
+        darkMode: "حالت تیره"
+      }
+    : {
+        headline: "Everything that matters, visible in one place.",
+        description:
+          "Track vehicles, pets, equipment and places on a live map, understand their status and stay informed about important events.",
+        chip: "Location, status and alerts at a glance",
+        featureOne: "Secure sign-in",
+        featureTwo: "Live map",
+        featureThree: "Smart alerts",
+        lightMode: "Light mode",
+        darkMode: "Dark mode"
+      };
+
+  return {
+    eyebrow: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.eyebrow",
+      "CORELINK_COPY_EYEBROW",
+      languageTag,
+      brand.name.toUpperCase()
+    ),
+    headline: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.headline",
+      "CORELINK_COPY_HEADLINE",
+      languageTag,
+      defaults.headline
+    ),
+    description: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.description",
+      "CORELINK_COPY_DESCRIPTION",
+      languageTag,
+      defaults.description
+    ),
+    chip: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.chip",
+      "CORELINK_COPY_CHIP",
+      languageTag,
+      defaults.chip
+    ),
+    featureOne: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.featureOne",
+      "CORELINK_COPY_FEATURE_ONE",
+      languageTag,
+      defaults.featureOne
+    ),
+    featureTwo: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.featureTwo",
+      "CORELINK_COPY_FEATURE_TWO",
+      languageTag,
+      defaults.featureTwo
+    ),
+    featureThree: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.featureThree",
+      "CORELINK_COPY_FEATURE_THREE",
+      languageTag,
+      defaults.featureThree
+    ),
+    lightMode: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.lightMode",
+      "CORELINK_COPY_LIGHT_MODE",
+      languageTag,
+      defaults.lightMode
+    ),
+    darkMode: readLocalizedValue(
+      attributes,
+      properties,
+      "copy.darkMode",
+      "CORELINK_COPY_DARK_MODE",
+      languageTag,
+      defaults.darkMode
+    )
+  };
+}
+
 function BrandLockup({ brand, compact = false }: { brand: Brand; compact?: boolean }) {
   const fallbackToDefaultMark = (event: SyntheticEvent<HTMLImageElement>) => {
     const image = event.currentTarget;
@@ -147,49 +295,21 @@ function BrandLockup({ brand, compact = false }: { brand: Brand; compact?: boole
 export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   const { i18n } = useI18n({ kcContext });
   const lang = i18n.currentLanguage.languageTag;
-  const isRtl = lang === "fa" || lang === "ar";
+  const isRtl = isRtlLanguage(lang);
+  const direction = isRtl ? "rtl" : "ltr";
   const [colorMode, setColorMode] = useState<ColorMode>(getInitialColorMode);
   const brand = useMemo(() => readBrand(kcContext), [kcContext]);
-
-  const copy = useMemo(
-    () =>
-      isRtl
-        ? {
-            eyebrow: brand.name.toUpperCase(),
-            headline: "همه چیزهایی که برایتان مهم است را یک‌جا ببینید.",
-            description:
-              "خودروها، حیوانات، تجهیزات و مکان‌ها را روی نقشه دنبال کنید، وضعیتشان را ببینید و از اتفاق‌های مهم باخبر شوید.",
-            chip: "موقعیت، وضعیت و هشدارها در یک نگاه",
-            featureOne: "ورود امن",
-            featureTwo: "نقشه زنده",
-            featureThree: "هشدارهای هوشمند",
-            lightMode: "حالت روشن",
-            darkMode: "حالت تیره"
-          }
-        : {
-            eyebrow: brand.name.toUpperCase(),
-            headline: "Everything that matters, visible in one place.",
-            description:
-              "Track vehicles, pets, equipment and places on a live map, understand their status and stay informed about important events.",
-            chip: "Location, status and alerts at a glance",
-            featureOne: "Secure sign-in",
-            featureTwo: "Live map",
-            featureThree: "Smart alerts",
-            lightMode: "Light mode",
-            darkMode: "Dark mode"
-          },
-    [isRtl, brand.name]
-  );
-
+  const copy = useMemo(() => readHeroCopy(kcContext, lang, brand), [kcContext, lang, brand]);
   const locales = kcContext.locale?.supported ?? [];
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.lang = lang;
-    document.documentElement.dir = isRtl ? "rtl" : "ltr";
+    document.documentElement.dir = direction;
     document.documentElement.dataset.theme = colorMode;
+    document.body.dir = direction;
     document.body.dataset.identityPage = kcContext.pageId;
     window.localStorage.setItem("corelink-identity-theme", colorMode);
-  }, [lang, isRtl, colorMode, kcContext.pageId]);
+  }, [lang, direction, colorMode, kcContext.pageId]);
 
   const toggleColorMode = () => {
     setColorMode(current => (current === "dark" ? "light" : "dark"));
@@ -202,22 +322,33 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
 
   return (
     <Suspense>
-      <div className="corelink-auth-shell" style={brandStyle}>
+      <div className="corelink-auth-shell" style={brandStyle} lang={lang} dir={direction}>
         <main className="corelink-form-panel">
           <div className="corelink-form-controls">
             {locales.length > 1 && (
               <nav className="corelink-language-switcher" aria-label="Language">
-                {locales.map(locale => (
-                  <a
-                    key={locale.languageTag}
-                    href={locale.url}
-                    className={locale.languageTag === lang ? "is-active" : undefined}
-                    lang={locale.languageTag}
-                    hrefLang={locale.languageTag}
-                  >
-                    {locale.languageTag.toUpperCase()}
-                  </a>
-                ))}
+                {locales.map(locale => {
+                  const localeDirection = isRtlLanguage(locale.languageTag) ? "rtl" : "ltr";
+
+                  return (
+                    <a
+                      key={locale.languageTag}
+                      href={locale.url}
+                      className={locale.languageTag === lang ? "is-active" : undefined}
+                      lang={locale.languageTag}
+                      hrefLang={locale.languageTag}
+                      onClick={() => {
+                        // Apply direction immediately. Keycloak then follows the locale URL and
+                        // the layout effect re-asserts the server-selected locale after navigation.
+                        document.documentElement.lang = locale.languageTag;
+                        document.documentElement.dir = localeDirection;
+                        document.body.dir = localeDirection;
+                      }}
+                    >
+                      {locale.languageTag.toUpperCase()}
+                    </a>
+                  );
+                })}
               </nav>
             )}
 
