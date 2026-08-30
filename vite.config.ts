@@ -9,7 +9,16 @@ export default defineConfig({
     react(),
     keycloakify({
       artifactId,
-      accountThemeImplementation: "none"
+      accountThemeImplementation: "Single-Page",
+      environmentVariables: [
+        { name: "CORELINK_BRAND_NAME", default: "" },
+        { name: "CORELINK_BRAND_TAGLINE", default: "" },
+        { name: "CORELINK_BRAND_LOGO_URL", default: "" },
+        { name: "CORELINK_BRAND_MARK_URL", default: "" },
+        { name: "CORELINK_BRAND_BACKGROUND_URL", default: "" },
+        { name: "CORELINK_BRAND_PRIMARY_COLOR", default: "" },
+        { name: "CORELINK_BRAND_ACCENT_COLOR", default: "" }
+      ]
     })
   ]
 });
