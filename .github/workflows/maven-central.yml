@@ -25,32 +25,31 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ inputs.ref }}
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 20
 
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
-      - name: Install Maven and publishing tools
+      - name: Verify publishing tools
         run: |
-          if ! command -v mvn >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y maven
-          fi
+          command -v gh
           command -v gpg
           command -v zip
           command -v python3
-          mvn -version
+          command -v jar
+          java -version
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Keycloak theme JARs
-        run: npm run build:keycloak
+      - name: Download released Keycloak theme JAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REF: ${{ inputs.ref }}
+        run: |
+          mkdir -p dist_keycloak
+          gh release download "$RELEASE_REF" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'keycloak-theme-for-kc-all-other-versions.jar' \
+            --dir dist_keycloak
+          test -s dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar
+          sha256sum dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar
 
       - name: Import Maven Central signing key
         env:
