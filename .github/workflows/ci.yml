@@ -22,6 +22,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 20
+          cache: npm
 
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
@@ -34,11 +35,11 @@ jobs:
           fi
           mvn -version
 
-      - name: Install dependencies
+      - name: Install dependencies reproducibly
         id: install
         run: |
           set -o pipefail
-          npm install 2>&1 | tee ci-install.log
+          npm ci 2>&1 | tee ci-install.log
 
       - name: Sync Keycloakify extensions
         id: sync
@@ -61,8 +62,11 @@ jobs:
       - name: Verify extension overrides after Keycloak build
         run: npm run verify:extensions
 
-      - name: Inspect Keycloak build output
-        run: find dist_keycloak -maxdepth 2 -type f -print
+      - name: Verify expected Keycloak build outputs
+        run: |
+          test -s dist_keycloak/keycloak-theme-for-kc-22-to-25.jar
+          test -s dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar
+          find dist_keycloak -maxdepth 2 -type f -print
 
       - name: Validate production Docker image
         id: docker
