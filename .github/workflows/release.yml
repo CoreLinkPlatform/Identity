@@ -19,6 +19,17 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 20
+          cache: npm
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          echo "tag version:     ${TAG_VERSION}"
+          echo "package version: ${PACKAGE_VERSION}"
+          test "${TAG_VERSION}" = "${PACKAGE_VERSION}"
 
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
@@ -31,11 +42,19 @@ jobs:
           fi
           mvn -version
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Validate source and generated overrides
+        run: npm run check
 
       - name: Build Keycloak theme JARs
         run: npm run build:keycloak
+
+      - name: Verify expected release JARs
+        run: |
+          test -s dist_keycloak/keycloak-theme-for-kc-22-to-25.jar
+          test -s dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar
 
       - name: Generate checksums
         run: sha256sum dist_keycloak/*.jar > SHA256SUMS
