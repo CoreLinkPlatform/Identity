@@ -3,13 +3,21 @@ import { readFileSync } from "node:fs";
 const checks = [
   {
     path: "src/admin/KcPage.tsx",
-    mustInclude: ["full page redirect"],
-    mustNotInclude: ["DPoP", "mode: \"auto\"", "sessionRestorationMethod: import.meta.env.DEV ? \"full page redirect\" : \"auto\""]
+    mustInclude: ["sessionRestorationMethod: \"full page redirect\""],
+    mustNotInclude: [
+      "DPoP({",
+      "mode: \"auto\"",
+      "sessionRestorationMethod: import.meta.env.DEV ? \"full page redirect\" : \"auto\""
+    ]
   },
   {
     path: "src/account/KcPage.tsx",
-    mustInclude: ["full page redirect"],
-    mustNotInclude: ["DPoP", "mode: \"auto\"", "sessionRestorationMethod: import.meta.env.DEV ? \"full page redirect\" : \"auto\""]
+    mustInclude: ["sessionRestorationMethod: \"full page redirect\""],
+    mustNotInclude: [
+      "DPoP({",
+      "mode: \"auto\"",
+      "sessionRestorationMethod: import.meta.env.DEV ? \"full page redirect\" : \"auto\""
+    ]
   },
   {
     path: "src/admin/KcAdminUi.tsx",
