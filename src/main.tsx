@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { KcPage } from "./kc.gen";
 import "./styles/corelink.css";
+import "./styles/login-controls.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
