@@ -13,15 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
       - name: Install dependencies
         run: npm install
-      - name: Typecheck and build
+
+      - name: Typecheck and web build
         run: npm run check
+
       - name: Build Keycloak theme
         run: npm run build:keycloak
+
       - name: Upload theme JAR
         uses: actions/upload-artifact@v4
         with:
