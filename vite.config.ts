@@ -9,10 +9,7 @@ export default defineConfig({
     react(),
     keycloakify({
       artifactId,
-      accountThemeImplementation: "none",
-      keycloakVersionTargets: {
-        "26.2-and-above": `${artifactId}-26.2-and-above.jar`
-      }
+      accountThemeImplementation: "none"
     })
   ]
 });
