@@ -9,15 +9,17 @@
   },
   "type": "module",
   "scripts": {
-    "postinstall": "keycloakify sync-extensions",
+    "sync:extensions": "node scripts/sync-extensions-preserving-overrides.mjs",
+    "verify:extensions": "node scripts/verify-extension-overrides.mjs",
+    "postinstall": "npm run sync:extensions && npm run verify:extensions",
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "build": "tsc && vite build",
-    "build:keycloak": "npm run build && keycloakify build",
+    "build:keycloak": "npm run verify:extensions && npm run build && keycloakify build && npm run verify:extensions",
     "start:keycloak": "keycloakify start-keycloak",
     "add-story": "keycloakify add-story",
     "format": "prettier . --write",
-    "check": "npm run typecheck && npm run build"
+    "check": "npm run verify:extensions && npm run typecheck && npm run build"
   },
   "license": "MIT",
   "dependencies": {
