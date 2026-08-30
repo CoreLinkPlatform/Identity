@@ -31,7 +31,8 @@ const fileOverrides = [
   ["overrides/email/corelink-mark.svg", "src/email/resources/corelink-mark.svg"],
   ["overrides/account/KcAccountUi.tsx", "src/account/KcAccountUi.tsx"],
   ["overrides/account/Header.tsx", "src/account/root/Header.tsx"],
-  ["overrides/admin/KcAdminUi.tsx", "src/admin/KcAdminUi.tsx"]
+  ["overrides/admin/KcAdminUi.tsx", "src/admin/KcAdminUi.tsx"],
+  ["overrides/admin/PageHeader.tsx", "src/admin/PageHeader.tsx"]
 ];
 
 for (const [source, destination] of fileOverrides) {
