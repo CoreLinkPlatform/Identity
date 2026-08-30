@@ -2,19 +2,36 @@
 
 CoreLink Identity is intentionally reusable. CoreLink is the default brand, not a runtime dependency.
 
-## Build-time options
+## Theme name vs visible brand
+
+Keycloakify derives the actual Keycloak theme identifier from `package.json:name`. The default package name is `corelink`, so the theme appears as `corelink` in Realm settings.
+
+For a source fork:
+
+```bash
+npm pkg set name=acme
+```
+
+For the provided Dockerfile, use:
+
+```bash
+--build-arg KEYCLOAK_THEME_NAME=acme
+```
+
+The Dockerfile updates the package name inside the build stage automatically.
+
+## Visible branding options
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `KEYCLOAK_THEME_NAME` | `corelink` | Theme identifier shown in Keycloak Realm settings and used in the JAR filename. |
 | `VITE_BRAND_NAME` | `CoreLink` | Visible product/brand name. |
 | `VITE_BRAND_TAGLINE` | `Secure connected intelligence` | Footer tagline. |
 | `VITE_BRAND_MARK` | `img/corelink-mark.svg` | Logo path relative to Keycloak theme resources. |
 
-Example:
+Source-build example:
 
 ```bash
-KEYCLOAK_THEME_NAME=acme \
+npm pkg set name=acme
 VITE_BRAND_NAME="Acme Cloud" \
 VITE_BRAND_TAGLINE="Identity for your workspace" \
 VITE_BRAND_MARK="img/acme.svg" \
@@ -35,7 +52,13 @@ Prefer SVG for crisp rendering. Do not embed secrets, tenant identifiers, tracki
 
 ## Colors and layout
 
-The authentication surface styles live under `src/login/`. Keep branding tokens centralized when extending the project rather than scattering product-specific colors through individual pages.
+Authentication styles are currently centralized in:
+
+```text
+src/styles/corelink.css
+```
+
+A public fork may rename that file, but keep design tokens and structural rules centralized rather than scattering product-specific values through individual Keycloak pages.
 
 When modifying layout, preserve:
 
@@ -47,29 +70,27 @@ When modifying layout, preserve:
 
 ## Persian and RTL
 
-Persian messages are stored in:
+Standard translations, including Persian, are provided through Keycloakify's login i18n layer. The CoreLink-specific i18n wrapper is at:
 
 ```text
-src/login/messages/fa.ts
+src/login/i18n.ts
 ```
 
-The page sets `dir=rtl` automatically for Persian (`fa`) and Arabic (`ar`). Prefer logical properties such as `margin-inline-start`, `padding-inline-end`, `inset-inline-start` and equivalent utility patterns instead of hard-coded left/right rules.
+The page applies `dir=rtl` automatically for Persian (`fa`) and Arabic (`ar`). Prefer logical properties such as `margin-inline-start`, `padding-inline-end` and `inset-inline-start` instead of hard-coded left/right rules.
 
 ## White-label / multi-tenant branding
 
 The current implementation uses build-time branding. This is deliberately simple and safe for the first public version.
 
-For multi-tenant installations that need different branding per realm without rebuilding, add a separate, reviewed realm-brand configuration mechanism or Keycloak SPI. Do not expose arbitrary HTML/JavaScript stored in realm attributes. Validate URLs/colors strictly and maintain safe fallbacks.
+For installations that need different branding per realm without rebuilding, add a separately reviewed realm-brand configuration mechanism or Keycloak SPI. Do not allow arbitrary stored HTML or JavaScript. Validate URLs/colors strictly and provide safe bundled fallbacks.
 
-## What to rename in a public fork
+## Public fork checklist
 
-At minimum:
-
-1. Set `KEYCLOAK_THEME_NAME`.
+1. Change `package.json:name` to the desired Keycloak theme identifier.
 2. Set `VITE_BRAND_NAME` and `VITE_BRAND_TAGLINE`.
-3. Replace the logo asset.
-4. Adjust color tokens/styles.
-5. Update README/repository metadata.
-6. Build a new JAR and select the new theme name in Keycloak.
+3. Replace or configure the logo asset.
+4. Adjust colors/styles.
+5. Update repository metadata and documentation.
+6. Build a JAR and select the new package/theme name in Keycloak.
 
-The source package name `@corelinkplatform/identity` can also be changed in `package.json` if the fork is maintained as a separate project. `private: true` only prevents accidental npm publication; it does not restrict GitHub/public use.
+`private: true` in `package.json` only prevents accidental npm publication. It does **not** make the GitHub repository private and does not restrict use under the MIT license.
