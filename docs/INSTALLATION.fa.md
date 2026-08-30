@@ -12,7 +12,7 @@
 
 ### مراحل
 
-1. از بخش Releases فایل `corelink-26.2-and-above.jar` و فایل `SHA256SUMS` را دانلود کنید.
+1. از بخش Releases فایل `corelink-26.2-and-above.jar` و `SHA256SUMS` را دانلود کنید.
 2. صحت فایل را بررسی کنید:
 
 ```bash
@@ -38,7 +38,7 @@ cp corelink-26.2-and-above.jar /opt/keycloak/providers/corelink-theme.jar
 Realm settings → Themes → Login theme → corelink
 ```
 
-7. تنظیم را Save کنید و یکی از flowهای login همان realm را تست کنید.
+7. تنظیم را Save کنید و login واقعی همان realm را تست کنید.
 
 ### اگر Keycloak با Docker اجرا می‌شود
 
@@ -57,8 +57,6 @@ CMD ["start", "--optimized"]
 
 ## ۲. اجرای Docker image آماده GHCR
 
-Image منتشرشده شامل Keycloak بهینه‌شده و theme نصب‌شده است.
-
 ```bash
 docker pull ghcr.io/corelinkplatform/identity:v0.1.0
 ```
@@ -73,15 +71,11 @@ docker run --rm -p 8080:8080 \
   start-dev
 ```
 
-برای Production از `start-dev` استفاده نکنید. دیتابیس، hostname، TLS/proxy و secretها باید توسط سیستم Deployment شما تأمین شوند.
+برای Production از `start-dev` استفاده نکنید. دیتابیس، hostname، TLS/proxy و secretها باید توسط سیستم Deployment تأمین شوند.
 
-## ۳. ساخت از سورس
+## ۳. ساخت نسخه CoreLink از سورس
 
-نیازمندی‌ها:
-
-- Node.js 20+
-- npm
-- Docker فقط در صورتی که image کامل Keycloak می‌خواهید
+نیازمندی‌ها: Node.js 20+ و npm.
 
 ```bash
 git clone https://github.com/CoreLinkPlatform/Identity.git
@@ -96,24 +90,22 @@ npm run build:keycloak
 dist_keycloak/corelink-26.2-and-above.jar
 ```
 
-## ۴. ساخت theme با برند اختصاصی
+## ۴. ساخت fork با برند اختصاصی
+
+در Keycloakify نام واقعی theme از `package.json:name` گرفته می‌شود. در fork خودتان ابتدا نام package را تغییر دهید:
 
 ```bash
-KEYCLOAK_THEME_NAME=acme \
+npm pkg set name=acme
 VITE_BRAND_NAME="Acme" \
 VITE_BRAND_TAGLINE="Secure workspace" \
 npm run build:keycloak
 ```
 
-خروجی مورد انتظار:
-
-```text
-dist_keycloak/acme-26.2-and-above.jar
-```
-
-بعد در Realm settings مقدار Login theme را روی `acme` بگذارید.
+بعد theme با نام `acme` در Realm settings قابل انتخاب خواهد بود. برای لوگو فایل `public/img/corelink-mark.svg` را جایگزین کنید یا `VITE_BRAND_MARK` را روی resource دیگری بگذارید.
 
 ## ۵. ساخت Docker image اختصاصی
+
+Dockerfile این repository مقدار `KEYCLOAK_THEME_NAME` را به نام package/theme تبدیل می‌کند:
 
 ```bash
 docker build \
@@ -135,7 +127,7 @@ docker build \
 3. JAR یا Docker image قبلی را با نسخه tagشده جدید جایگزین کنید.
 4. در نصب دستی JAR دوباره `kc.sh build` را اجرا کنید.
 5. Keycloak را restart کنید.
-6. login، reset password، verify email، OTP/TOTP و required actionهای اختصاصی را تست کنید.
+6. login، register، reset password، verify email، OTP/TOTP و required actionهای اختصاصی را تست کنید.
 
 چند نسخه از یک theme را هم‌زمان داخل `providers/` قرار ندهید.
 
@@ -143,7 +135,7 @@ docker build \
 
 ### Theme در لیست دیده نمی‌شود
 
-وجود JAR در `/opt/keycloak/providers/` را بررسی کنید، `kc.sh build` را دوباره اجرا کنید، سرویس را restart کنید و مطمئن شوید نام theme با مقدار `KEYCLOAK_THEME_NAME` زمان build یکی است.
+وجود JAR در `/opt/keycloak/providers/` را بررسی کنید، `kc.sh build` را دوباره اجرا کنید، سرویس را restart کنید و مطمئن شوید نام انتخاب‌شده با `package.json:name` زمان build یکی است؛ در Docker این نام از `KEYCLOAK_THEME_NAME` گرفته می‌شود.
 
 ### استایل قدیمی نمایش داده می‌شود
 
@@ -151,7 +143,7 @@ Keycloak را restart و cache مرورگر را پاک کنید.
 
 ### فارسی نمایش داده نمی‌شود
 
-Internationalization را در Realm فعال کنید و زبان فارسی (`fa`) را به Supported locales اضافه کنید. رابط برای فارسی و عربی به‌صورت خودکار `dir=rtl` می‌گذارد.
+Internationalization را در Realm فعال کنید و زبان فارسی (`fa`) را به Supported locales اضافه کنید. رابط برای فارسی و عربی به‌صورت خودکار RTL می‌شود.
 
 ### Container بالا می‌آید ولی Production configuration خطا دارد
 
