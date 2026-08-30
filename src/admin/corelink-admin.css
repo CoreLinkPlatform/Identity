@@ -3,26 +3,85 @@
   --pf-v5-global--primary-color--100:#2f81f7;
   --pf-v5-global--primary-color--200:#256fe0;
   --pf-v5-global--BackgroundColor--100:#f5f8fc;
+  --cl-admin-primary:#2f81f7;
+  --cl-admin-accent:#20a9df;
+  --cl-admin-navy:#07182f;
+  --cl-admin-sidebar:#0a1d36;
+  --cl-admin-border:#d8e3ef;
+  --cl-admin-muted:#64748b;
+  --cl-admin-danger:#dc2626;
 }
+
+html,body,#root{min-height:100%;background:#f5f8fc}
 html[dir=rtl]{font-family:Vazirmatn,Tahoma,Arial,sans-serif}
 html[dir=rtl] body,html[dir=rtl] button,html[dir=rtl] input,html[dir=rtl] select,html[dir=rtl] textarea{font-family:Vazirmatn,Tahoma,Arial,sans-serif}
-body[data-corelink-surface=admin]{background:linear-gradient(180deg,#f7faff,#eef4fa)}
-.pf-v5-c-masthead,.pf-c-masthead{background:#07182f!important;border-bottom:1px solid rgba(255,255,255,.08)!important}
-.pf-v5-c-page__sidebar,.pf-c-page__sidebar{background:#0a1d36!important}
-.pf-v5-c-nav__link,.pf-c-nav__link{border-radius:9px;margin:2px 8px;color:#d8e5f3!important}
-.pf-v5-c-nav__link.pf-m-current,.pf-c-nav__link.pf-m-current{background:rgba(47,129,247,.18)!important;color:#fff!important}
-.pf-v5-c-card,.pf-c-card{border:1px solid #dce5ef!important;border-radius:16px!important;box-shadow:0 10px 30px rgba(15,35,55,.06)!important}
-.pf-v5-c-form-control,.pf-c-form-control,input,select,textarea{border-radius:10px!important}
-.pf-v5-c-button.pf-m-primary,.pf-c-button.pf-m-primary{border-radius:10px!important;background:#2f81f7!important}
-.pf-v5-c-page__main-section,.pf-c-page__main-section{background:transparent!important}
-html[dir=rtl] .pf-v5-c-page__main,html[dir=rtl] .pf-c-page__main{text-align:right}
+body[data-corelink-surface=admin]{background:linear-gradient(180deg,#f7faff,#eef4fa);color:#102035}
 
-.corelink-surface-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#0c2948 0%,#07182f 46%,#04101e 100%);color:#fff}
-.corelink-surface-loader__card{display:grid;justify-items:center;gap:14px;padding:28px 34px;text-align:center}
-.corelink-surface-loader__mark{width:54px;height:54px;object-fit:contain;animation:corelink-loader-pulse 1.5s ease-in-out infinite}
+.pf-v5-c-masthead,.pf-c-masthead{background:linear-gradient(90deg,#061528,#0a203a)!important;border-bottom:1px solid rgba(255,255,255,.08)!important;box-shadow:0 8px 30px rgba(5,20,38,.14)}
+.pf-v5-c-page__sidebar,.pf-c-page__sidebar{background:linear-gradient(180deg,#0a1d36,#07182f)!important;border-inline-end:1px solid rgba(255,255,255,.06)}
+.pf-v5-c-nav__link,.pf-c-nav__link{border-radius:9px;margin:2px 8px;color:#d8e5f3!important;transition:background .18s ease,color .18s ease}
+.pf-v5-c-nav__link:hover,.pf-c-nav__link:hover{background:rgba(255,255,255,.07)!important;color:#fff!important}
+.pf-v5-c-nav__link.pf-m-current,.pf-c-nav__link.pf-m-current,.pf-v5-c-nav__link[aria-current=page],.pf-c-nav__link[aria-current=page]{background:linear-gradient(90deg,rgba(47,129,247,.28),rgba(32,169,223,.14))!important;color:#fff!important;box-shadow:inset 3px 0 0 #38bdf8}
+
+.pf-v5-c-page__main-section,.pf-c-page__main-section{background:transparent!important}
+.pf-v5-c-card,.pf-c-card{border:1px solid var(--cl-admin-border)!important;border-radius:16px!important;box-shadow:0 10px 30px rgba(15,35,55,.06)!important}
+
+.pf-v5-c-form-control,.pf-c-form-control,input:not([type=checkbox]):not([type=radio]),select,textarea{min-height:40px;border-radius:10px!important;border-color:#cfdbe8!important;background:#fff!important;box-shadow:none!important}
+.pf-v5-c-form-control:focus,.pf-c-form-control:focus,input:focus,select:focus,textarea:focus{border-color:#5aa0ff!important;box-shadow:0 0 0 3px rgba(47,129,247,.12)!important;outline:0!important}
+
+/* Keep compact admin toolbar actions compact; only form/action submits become wide. */
+.pf-v5-c-button,.pf-c-button,button{border-radius:10px!important;font-weight:650}
+.pf-v5-c-button.pf-m-primary,.pf-c-button.pf-m-primary{border:0!important;background:linear-gradient(90deg,var(--cl-admin-primary),var(--cl-admin-accent))!important;color:#fff!important;box-shadow:0 8px 20px rgba(47,129,247,.16)!important}
+.pf-v5-c-button.pf-m-primary:hover,.pf-c-button.pf-m-primary:hover{filter:brightness(1.04)}
+
+/* Footer/form primary actions may be large, but toolbar Create buttons should stay natural width. */
+form .pf-v5-c-action-list .pf-m-primary,
+form .pf-c-form__actions .pf-m-primary,
+.pf-v5-c-page__main-section form > .pf-v5-c-button.pf-m-primary,
+.pf-c-page__main-section form > .pf-c-button.pf-m-primary{min-height:46px;padding-inline:28px}
+
+/* Secondary, tertiary, link and negative actions must not look like broken text. */
+.pf-v5-c-button.pf-m-secondary,.pf-c-button.pf-m-secondary{min-height:40px;border:1px solid #b9cbe0!important;background:#fff!important;color:#1d4f91!important;box-shadow:0 3px 10px rgba(15,35,55,.05)}
+.pf-v5-c-button.pf-m-secondary:hover,.pf-c-button.pf-m-secondary:hover{border-color:#7facdf!important;background:#f5f9ff!important}
+.pf-v5-c-button.pf-m-tertiary,.pf-c-button.pf-m-tertiary{min-height:40px;border:1px solid #d4deea!important;background:#f8fafc!important;color:#334155!important}
+.pf-v5-c-button.pf-m-link,.pf-c-button.pf-m-link{min-height:38px;padding-inline:12px!important;color:#256fe0!important;text-decoration:none!important;background:transparent!important}
+.pf-v5-c-button.pf-m-link:hover,.pf-c-button.pf-m-link:hover{background:rgba(47,129,247,.07)!important;color:#174ea6!important}
+.pf-v5-c-button.pf-m-danger,.pf-c-button.pf-m-danger,.pf-v5-c-button.pf-m-destructive,.pf-c-button.pf-m-destructive{min-height:40px;border:1px solid rgba(220,38,38,.28)!important;background:#fff7f7!important;color:var(--cl-admin-danger)!important;box-shadow:none!important}
+.pf-v5-c-button.pf-m-danger:hover,.pf-c-button.pf-m-danger:hover,.pf-v5-c-button.pf-m-destructive:hover,.pf-c-button.pf-m-destructive:hover{background:#feecec!important;border-color:rgba(220,38,38,.45)!important}
+
+/* Admin sticky form footer: primary stays visually dominant, Revert/Cancel becomes a real secondary action. */
+.pf-v5-c-action-list,.pf-c-form__actions{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap}
+.pf-v5-c-action-list>.pf-m-primary,.pf-c-form__actions>.pf-m-primary{flex:1 1 320px;min-height:46px}
+.pf-v5-c-action-list>.pf-m-link,.pf-c-form__actions>.pf-m-link{flex:0 0 auto;min-width:110px;border:1px solid #d4deea!important;background:#fff!important;color:#475569!important}
+
+/* Tables and toolbars: prevent filter/search controls from colliding with headings. */
+.pf-v5-c-toolbar,.pf-c-toolbar{padding-block:12px!important;gap:10px!important}
+.pf-v5-c-toolbar__content-section,.pf-c-toolbar__content-section{gap:10px!important;align-items:center!important;flex-wrap:wrap}
+.pf-v5-c-input-group,.pf-c-input-group{min-width:220px}
+.pf-v5-c-table,.pf-c-table{background:#fff;border-radius:12px;overflow:hidden}
+.pf-v5-c-table tr,.pf-c-table tr{border-color:#e6edf5!important}
+.pf-v5-c-table tbody tr:hover,.pf-c-table tbody tr:hover{background:#f8fbff!important}
+.pf-v5-c-tabs,.pf-c-tabs{border-bottom-color:#d8e3ef!important}
+.pf-v5-c-tabs__item.pf-m-current .pf-v5-c-tabs__link,.pf-c-tabs__item.pf-m-current .pf-c-tabs__link{color:#174ea6!important}
+
+/* Provider chooser cards */
+.pf-v5-c-card.pf-m-selectable,.pf-c-card.pf-m-selectable,[class*="provider"] .pf-v5-c-card{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.pf-v5-c-card.pf-m-selectable:hover,.pf-c-card.pf-m-selectable:hover,[class*="provider"] .pf-v5-c-card:hover{transform:translateY(-1px);border-color:#b8cde5!important;box-shadow:0 14px 30px rgba(15,35,55,.09)!important}
+
+/* Replace the jarring full-screen/patternfly loading transition with one stable branded surface. */
+.corelink-surface-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#07182f;color:#fff;animation:corelink-loader-in .12s ease-out both}
+.corelink-surface-loader__card{display:grid;justify-items:center;gap:12px;padding:28px 34px;text-align:center}
+.corelink-surface-loader__mark{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 8px 22px rgba(47,129,247,.26))}
 .corelink-surface-loader__title{font-size:16px;font-weight:800;letter-spacing:.01em}
 .corelink-surface-loader__hint{color:#9fb4c9;font-size:12px}
-.corelink-surface-loader__bar{width:112px;height:3px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.12)}
-.corelink-surface-loader__bar::after{content:"";display:block;width:45%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2f81f7,#20a9df);animation:corelink-loader-slide 1s ease-in-out infinite alternate}
-@keyframes corelink-loader-pulse{50%{transform:scale(1.05);filter:drop-shadow(0 0 14px rgba(47,129,247,.45))}}
-@keyframes corelink-loader-slide{from{transform:translateX(-20%)}to{transform:translateX(135%)}}
+.corelink-surface-loader__bar{width:120px;height:3px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.12)}
+.corelink-surface-loader__bar::after{content:"";display:block;width:42%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2f81f7,#20a9df);animation:corelink-loader-slide .9s ease-in-out infinite alternate}
+@keyframes corelink-loader-in{from{opacity:.92}to{opacity:1}}
+@keyframes corelink-loader-slide{from{transform:translateX(-10%)}to{transform:translateX(150%)}}
+
+/* The upstream blue circular spinner can still appear during route/data transitions. De-emphasize it so it does not flash over our shell. */
+body[data-corelink-surface=admin] .pf-v5-c-spinner,
+body[data-corelink-surface=admin] .pf-c-spinner{--pf-v5-c-spinner--Color:var(--cl-admin-primary);opacity:.28;animation-duration:1.2s!important}
+
+html[dir=rtl] .pf-v5-c-page__main,html[dir=rtl] .pf-c-page__main{text-align:right}
+@media(max-width:900px){.pf-v5-c-toolbar__content-section,.pf-c-toolbar__content-section{align-items:stretch!important}.pf-v5-c-input-group,.pf-c-input-group{min-width:100%}.pf-v5-c-action-list>.pf-m-primary,.pf-c-form__actions>.pf-m-primary{flex-basis:100%}}
