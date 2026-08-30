@@ -1,0 +1,115 @@
+name: Maven Central
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Release tag to publish, e.g. v0.1.0"
+        required: true
+        default: "v0.1.0"
+      publishing_type:
+        description: "USER_MANAGED validates first; AUTOMATIC publishes after validation"
+        required: true
+        type: choice
+        default: "USER_MANAGED"
+        options:
+          - USER_MANAGED
+          - AUTOMATIC
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Use pre-installed Temurin JDK 17
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+
+      - name: Install Maven and publishing tools
+        run: |
+          if ! command -v mvn >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y maven
+          fi
+          command -v gpg
+          command -v zip
+          mvn -version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Keycloak theme JARs
+        run: npm run build:keycloak
+
+      - name: Import Maven Central signing key
+        env:
+          MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        run: |
+          test -n "$MAVEN_GPG_PRIVATE_KEY"
+          printf '%s' "$MAVEN_GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+
+      - name: Build signed Central bundle
+        env:
+          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: bash scripts/build-central-bundle.sh "${{ inputs.ref }}"
+
+      - name: Upload deployment to Maven Central
+        id: central
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          PUBLISHING_TYPE: ${{ inputs.publishing_type }}
+        run: |
+          test -n "$CENTRAL_USERNAME"
+          test -n "$CENTRAL_PASSWORD"
+
+          AUTH="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
+          DEPLOYMENT_NAME="CoreLink Identity ${{ inputs.ref }}"
+          DEPLOYMENT_ID="$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${AUTH}" \
+            --form bundle=@central-bundle.zip \
+            --get \
+            --data-urlencode "name=${DEPLOYMENT_NAME}" \
+            --data-urlencode "publishingType=${PUBLISHING_TYPE}" \
+            https://central.sonatype.com/api/v1/publisher/upload)"
+
+          echo "deployment_id=${DEPLOYMENT_ID}" >> "$GITHUB_OUTPUT"
+          echo "### Maven Central deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Coordinates: \`ir.coreplatform:identity-theme:${{ inputs.ref }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Deployment ID: \`${DEPLOYMENT_ID}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Publishing type: \`${PUBLISHING_TYPE}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check initial deployment status
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          DEPLOYMENT_ID: ${{ steps.central.outputs.deployment_id }}
+        run: |
+          AUTH="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${AUTH}" \
+            "https://central.sonatype.com/api/v1/publisher/status?id=${DEPLOYMENT_ID}" \
+            | tee central-status.json
+
+      - name: Upload Central bundle diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: maven-central-${{ inputs.ref }}
+          path: |
+            central-bundle.zip
+            central-status.json
+          if-no-files-found: ignore
