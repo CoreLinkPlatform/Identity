@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties, type SyntheticEvent } from "react";
 import DefaultPage from "keycloakify/login/DefaultPage";
 import Template from "keycloakify/login/Template";
 import type { KcContext } from "./KcContext";
@@ -8,12 +8,26 @@ import "./InteractiveBackground.css";
 
 const UserProfileFormFields = lazy(() => import("keycloakify/login/UserProfileFormFields"));
 
-const brandName = import.meta.env.VITE_BRAND_NAME || "CoreLink";
-const brandTagline = import.meta.env.VITE_BRAND_TAGLINE || "Secure connected intelligence";
-const brandMark = import.meta.env.VITE_BRAND_MARK || "img/corelink-mark.svg";
-const backgroundImage = import.meta.env.VITE_IDENTITY_BACKGROUND || "img/identity-topography.webp";
+const defaultBrandName = import.meta.env.VITE_BRAND_NAME || "CoreLink";
+const defaultBrandTagline = import.meta.env.VITE_BRAND_TAGLINE || "Secure connected intelligence";
+const defaultBrandMarkPath = import.meta.env.VITE_BRAND_MARK || "img/corelink-mark.svg";
+const defaultBackgroundPath = import.meta.env.VITE_IDENTITY_BACKGROUND || "img/identity-topography.webp";
+
+const defaultBrandMarkUrl = `${import.meta.env.BASE_URL}${defaultBrandMarkPath}`;
+const defaultBackgroundUrl = `${import.meta.env.BASE_URL}${defaultBackgroundPath}`;
 
 type ColorMode = "light" | "dark";
+type RealmWithAttributes = KcContext["realm"] & { attributes?: Record<string, string> };
+
+type Brand = {
+  name: string;
+  tagline: string;
+  logoUrl?: string;
+  markUrl: string;
+  backgroundUrl: string;
+  primaryColor?: string;
+  accentColor?: string;
+};
 
 function getInitialColorMode(): ColorMode {
   if (typeof window === "undefined") {
@@ -28,17 +42,85 @@ function getInitialColorMode(): ColorMode {
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
 }
 
+function resolveAssetUrl(value: string | undefined, fallback: string): string {
+  const candidate = value?.trim();
+
+  if (!candidate) {
+    return fallback;
+  }
+
+  if (/^(https?:|data:|blob:)/i.test(candidate) || candidate.startsWith("/")) {
+    return candidate;
+  }
+
+  return `${import.meta.env.BASE_URL}${candidate}`;
+}
+
+function readBrand(kcContext: KcContext): Brand {
+  const attributes = (kcContext.realm as RealmWithAttributes).attributes ?? {};
+  const logoValue = attributes["brand.logoUrl"]?.trim();
+
+  return {
+    name: attributes["brand.name"]?.trim() || defaultBrandName,
+    tagline: attributes["brand.tagline"]?.trim() || defaultBrandTagline,
+    logoUrl: logoValue ? resolveAssetUrl(logoValue, defaultBrandMarkUrl) : undefined,
+    markUrl: resolveAssetUrl(attributes["brand.markUrl"], defaultBrandMarkUrl),
+    backgroundUrl: resolveAssetUrl(attributes["brand.backgroundUrl"], defaultBackgroundUrl),
+    primaryColor: attributes["brand.primaryColor"]?.trim() || undefined,
+    accentColor: attributes["brand.accentColor"]?.trim() || undefined
+  };
+}
+
+function BrandLockup({ brand, compact = false }: { brand: Brand; compact?: boolean }) {
+  const fallbackToDefaultMark = (event: SyntheticEvent<HTMLImageElement>) => {
+    const image = event.currentTarget;
+
+    if (image.src !== defaultBrandMarkUrl) {
+      image.src = defaultBrandMarkUrl;
+      image.classList.remove("corelink-brand-logo");
+      image.classList.add("corelink-brand-mark");
+    }
+  };
+
+  if (brand.logoUrl) {
+    return (
+      <img
+        className={`corelink-brand-logo${compact ? " is-compact" : ""}`}
+        src={brand.logoUrl}
+        alt={brand.name}
+        onError={fallbackToDefaultMark}
+      />
+    );
+  }
+
+  return (
+    <>
+      <img
+        className="corelink-brand-mark"
+        src={brand.markUrl}
+        alt=""
+        onError={fallbackToDefaultMark}
+      />
+      <div className="corelink-brand-copy">
+        <strong>{brand.name}</strong>
+        <span>{brand.tagline}</span>
+      </div>
+    </>
+  );
+}
+
 export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   const { i18n } = useI18n({ kcContext });
   const lang = i18n.currentLanguage.languageTag;
   const isRtl = lang === "fa" || lang === "ar";
   const [colorMode, setColorMode] = useState<ColorMode>(getInitialColorMode);
+  const brand = useMemo(() => readBrand(kcContext), [kcContext]);
 
   const copy = useMemo(
     () =>
       isRtl
         ? {
-            eyebrow: "CORELINK",
+            eyebrow: brand.name.toUpperCase(),
             headline: "همه چیزهایی که برایتان مهم است را یک‌جا ببینید.",
             description:
               "خودروها، حیوانات، تجهیزات و مکان‌ها را روی نقشه دنبال کنید، وضعیتشان را ببینید و از اتفاق‌های مهم باخبر شوید.",
@@ -50,7 +132,7 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
             darkMode: "حالت تیره"
           }
         : {
-            eyebrow: "CORELINK",
+            eyebrow: brand.name.toUpperCase(),
             headline: "Everything that matters, visible in one place.",
             description:
               "Track vehicles, pets, equipment and places on a live map, understand their status and stay informed about important events.",
@@ -61,7 +143,7 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
             lightMode: "Light mode",
             darkMode: "Dark mode"
           },
-    [isRtl]
+    [isRtl, brand.name]
   );
 
   const locales = kcContext.locale?.supported ?? [];
@@ -78,9 +160,14 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
     setColorMode(current => (current === "dark" ? "light" : "dark"));
   };
 
+  const brandStyle = {
+    ...(brand.primaryColor ? { "--cl-primary": brand.primaryColor } : {}),
+    ...(brand.accentColor ? { "--cl-accent": brand.accentColor } : {})
+  } as CSSProperties;
+
   return (
     <Suspense>
-      <div className="corelink-auth-shell">
+      <div className="corelink-auth-shell" style={brandStyle}>
         <main className="corelink-form-panel">
           <div className="corelink-form-controls">
             {locales.length > 1 && (
@@ -121,11 +208,7 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
 
           <div className="corelink-form-inner">
             <div className="corelink-mobile-brand">
-              <img src={`${import.meta.env.BASE_URL}${brandMark}`} alt="" />
-              <div>
-                <strong>{brandName}</strong>
-                <span>{brandTagline}</span>
-              </div>
+              <BrandLockup brand={brand} compact />
             </div>
 
             <DefaultPage
@@ -139,22 +222,18 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
             />
 
             <footer className="corelink-auth-footer">
-              <span>{brandName} Identity</span>
+              <span>{brand.name} Identity</span>
               <span>•</span>
-              <span>{brandTagline}</span>
+              <span>{brand.tagline}</span>
             </footer>
           </div>
         </main>
 
         <aside className="corelink-hero-panel" aria-hidden="true">
-          <InteractiveBackground imageUrl={`${import.meta.env.BASE_URL}${backgroundImage}`} />
+          <InteractiveBackground imageUrl={brand.backgroundUrl} />
           <div className="corelink-hero-overlay" />
           <div className="corelink-hero-brand">
-            <img src={`${import.meta.env.BASE_URL}${brandMark}`} alt="" />
-            <div>
-              <strong>{brandName}</strong>
-              <span>{brandTagline}</span>
-            </div>
+            <BrandLockup brand={brand} />
           </div>
 
           <div className="corelink-hero-copy">
