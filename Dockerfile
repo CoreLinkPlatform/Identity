@@ -9,7 +9,7 @@ ENV KEYCLOAK_THEME_NAME=${KEYCLOAK_THEME_NAME}
 ENV VITE_BRAND_NAME=${VITE_BRAND_NAME}
 ENV VITE_BRAND_TAGLINE=${VITE_BRAND_TAGLINE}
 COPY package.json ./
-RUN npm install
+RUN npm pkg set name="${KEYCLOAK_THEME_NAME}" && npm install
 COPY . .
 RUN npm run build:keycloak \
     && cp dist_keycloak/*-26.2-and-above.jar /tmp/identity-theme.jar
