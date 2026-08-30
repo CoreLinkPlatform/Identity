@@ -43,6 +43,7 @@ jobs:
           fi
           command -v gpg
           command -v zip
+          command -v python3
           mvn -version
 
       - name: Install dependencies
@@ -70,24 +71,26 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           PUBLISHING_TYPE: ${{ inputs.publishing_type }}
+          RELEASE_REF: ${{ inputs.ref }}
         run: |
           test -n "$CENTRAL_USERNAME"
           test -n "$CENTRAL_PASSWORD"
 
+          VERSION="${RELEASE_REF#v}"
           AUTH="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
-          DEPLOYMENT_NAME="CoreLink Identity ${{ inputs.ref }}"
+          DEPLOYMENT_NAME="CoreLink Identity ${RELEASE_REF}"
+          ENCODED_NAME="$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["DEPLOYMENT_NAME"], safe=""))' DEPLOYMENT_NAME="$DEPLOYMENT_NAME")"
+          UPLOAD_URL="https://central.sonatype.com/api/v1/publisher/upload?name=${ENCODED_NAME}&publishingType=${PUBLISHING_TYPE}"
+
           DEPLOYMENT_ID="$(curl --fail-with-body --silent --show-error \
             --request POST \
             --header "Authorization: Bearer ${AUTH}" \
             --form bundle=@central-bundle.zip \
-            --get \
-            --data-urlencode "name=${DEPLOYMENT_NAME}" \
-            --data-urlencode "publishingType=${PUBLISHING_TYPE}" \
-            https://central.sonatype.com/api/v1/publisher/upload)"
+            "$UPLOAD_URL")"
 
           echo "deployment_id=${DEPLOYMENT_ID}" >> "$GITHUB_OUTPUT"
           echo "### Maven Central deployment" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Coordinates: \`ir.coreplatform:identity-theme:${{ inputs.ref }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Coordinates: \`ir.coreplatform:identity-theme:${VERSION}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Deployment ID: \`${DEPLOYMENT_ID}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Publishing type: \`${PUBLISHING_TYPE}\`" >> "$GITHUB_STEP_SUMMARY"
 
