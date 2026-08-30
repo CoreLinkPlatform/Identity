@@ -15,7 +15,7 @@ concurrency:
 jobs:
   build-theme:
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -61,6 +61,14 @@ jobs:
         if: steps.theme.outcome == 'success'
         run: find dist_keycloak -maxdepth 2 -type f -print
 
+      - name: Validate production Docker image
+        id: docker
+        if: steps.theme.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          docker build --pull -t corelink-identity:ci . 2>&1 | tee ci-docker.log
+
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v7.0.1
@@ -70,6 +78,7 @@ jobs:
             ci-install.log
             ci-check.log
             ci-theme.log
+            ci-docker.log
           if-no-files-found: ignore
 
       - name: Upload theme JAR
@@ -81,5 +90,5 @@ jobs:
           if-no-files-found: error
 
       - name: Fail if validation failed
-        if: steps.install.outcome != 'success' || steps.check.outcome != 'success' || steps.theme.outcome != 'success'
+        if: steps.install.outcome != 'success' || steps.check.outcome != 'success' || steps.theme.outcome != 'success' || steps.docker.outcome != 'success'
         run: exit 1
