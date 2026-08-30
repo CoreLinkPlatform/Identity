@@ -1,6 +1,6 @@
 {
   "name": "corelink",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Reusable Keycloak identity suite with CoreLink defaults",
   "repository": {
