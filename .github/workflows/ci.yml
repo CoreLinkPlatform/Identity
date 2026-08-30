@@ -40,8 +40,11 @@ jobs:
           set -o pipefail
           npm install 2>&1 | tee ci-install.log
 
-      - name: Verify preserved extension overrides
-        run: npm run verify:extensions
+      - name: Sync Keycloakify extensions
+        id: sync
+        run: |
+          set -o pipefail
+          npm run prepare:extensions 2>&1 | tee ci-sync.log
 
       - name: Typecheck and web build
         id: check
@@ -74,6 +77,7 @@ jobs:
           name: identity-ci-diagnostics
           path: |
             ci-install.log
+            ci-sync.log
             ci-check.log
             ci-theme.log
             ci-docker.log
