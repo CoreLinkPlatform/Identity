@@ -2,19 +2,30 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
+    paths:
+      - ".github/workflows/release.yml"
 
 permissions:
   contents: write
   packages: write
 
+env:
+  RELEASE_REF: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.1.1' }}
+  RELEASE_TARGET: ${{ github.ref_type == 'tag' && github.sha || '6cf74b4a3600246e4c6da9aca716b80c455620c9' }}
+
 jobs:
   release:
+    if: github.ref_type == 'tag' || github.event.head_commit.message == 'ci: release v0.1.1'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ env.RELEASE_TARGET }}
 
       - uses: actions/setup-node@v7
         with:
@@ -56,11 +67,11 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/corelinkplatform/identity:${{ github.ref_name }}
+            ghcr.io/corelinkplatform/identity:${{ env.RELEASE_REF }}
             ghcr.io/corelinkplatform/identity:latest
           labels: |
             org.opencontainers.image.source=https://github.com/CoreLinkPlatform/Identity
-            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.version=${{ env.RELEASE_REF }}
             org.opencontainers.image.title=CoreLink Identity
             org.opencontainers.image.licenses=MIT
           provenance: mode=max
@@ -69,4 +80,13 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" dist_keycloak/*.jar SHA256SUMS --generate-notes --title "CoreLink Identity ${GITHUB_REF_NAME}"
+        run: |
+          if gh release view "$RELEASE_REF" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_REF already exists"
+            exit 1
+          fi
+          gh release create "$RELEASE_REF" dist_keycloak/*.jar SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$RELEASE_TARGET" \
+            --generate-notes \
+            --title "CoreLink Identity $RELEASE_REF"
