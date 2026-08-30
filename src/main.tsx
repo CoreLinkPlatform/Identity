@@ -4,6 +4,7 @@ import { KcPage } from "./kc.gen";
 import "./styles/corelink.css";
 import "./styles/login-controls.css";
 import "./styles/password-toggle-fix.css";
+import "./styles/release-candidate.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
