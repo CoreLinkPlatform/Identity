@@ -1,6 +1,6 @@
 # CoreLink Identity
 
-یک قالب مدرن، قابل استفاده مجدد و مناسب محیط Production برای صفحه‌های احراز هویت Keycloak که با **Keycloakify، React، TypeScript و Vite** ساخته شده است. برند پیش‌فرض CoreLink است، اما نام theme، نام برند، شعار، لوگو، رنگ‌ها و ترجمه‌ها قابل تغییر هستند و پروژه می‌تواند برای هر محصول دیگری استفاده شود.
+یک قالب مدرن، قابل استفاده مجدد و مناسب محیط Production برای صفحه‌های احراز هویت Keycloak که با **Keycloakify، React، TypeScript و Vite** ساخته شده است. برند پیش‌فرض CoreLink است، اما نام theme، نام برند، شعار، لوگو، رنگ‌ها و متن‌های معرفی قابل تغییر هستند و پروژه می‌تواند برای هر محصول دیگری استفاده شود.
 
 [English README](README.md) · [راهنمای نصب فارسی](docs/INSTALLATION.fa.md) · [Branding](docs/BRANDING.md) · [راهنمای Release](docs/RELEASES.md)
 
@@ -8,16 +8,17 @@
 
 - رابط مدرن برای احراز هویت Keycloak بدون ظاهر پیش‌فرض Keycloak.
 - خروجی JAR قابل نصب برای Keycloak 26.2 به بالا.
-- پشتیبانی انگلیسی و فارسی با RTL واقعی.
+- پشتیبانی انگلیسی و فارسی با RTL/LTR پویا.
 - پوشش flowهای استاندارد ورود، ثبت‌نام، فراموشی رمز، تأیید ایمیل، OTP/TOTP و required actionها.
-- امکان تغییر branding هنگام build.
+- امکان تغییر branding هنگام build و از طریق Realm Attributes.
+- امکان تغییر متن‌های hero برای هر زبان بدون fork کردن کد.
 - Docker image چندمرحله‌ای Keycloak با theme از پیش نصب‌شده.
 - CI برای بررسی build.
 - Release خودکار شامل JAR آماده نصب، checksum و Docker image در GHCR.
 
 ## سازگاری
 
-نسخه پایه فعلی Docker روی **Keycloak 26.7.2** است و theme برای `26.2-and-above` ساخته می‌شود.
+نسخه پایه فعلی Docker روی **Keycloak 26.7.2** است.
 
 ## اجرای سریع برای توسعه
 
@@ -36,13 +37,9 @@ npm run dev
 npm run build:keycloak
 ```
 
-خروجی پیش‌فرض:
+خروجی‌های Keycloakify داخل `dist_keycloak/` ساخته می‌شوند.
 
-```text
-dist_keycloak/corelink-26.2-and-above.jar
-```
-
-برای نصب روی Keycloak موجود، فایل JAR را داخل `/opt/keycloak/providers/` قرار بده، `kc.sh build` را اجرا کن، Keycloak را restart کن و در **Realm settings → Themes → Login theme** مقدار `corelink` را انتخاب کن. جزئیات کامل در [docs/INSTALLATION.fa.md](docs/INSTALLATION.fa.md) آمده است.
+برای نصب روی Keycloak موجود، JAR مناسب نسخه Keycloak را داخل `/opt/keycloak/providers/` قرار بده، `kc.sh build` را اجرا کن، Keycloak را restart کن و در **Realm settings → Themes → Login theme** مقدار `corelink` را انتخاب کن. جزئیات کامل در [docs/INSTALLATION.fa.md](docs/INSTALLATION.fa.md) آمده است.
 
 ## استفاده برای محصول خودتان
 
@@ -57,7 +54,7 @@ VITE_BRAND_TAGLINE="Secure access" \
 npm run build:keycloak
 ```
 
-بعد theme با نام `my-product` در Keycloak قابل انتخاب است. برای لوگو می‌توان فایل `public/img/corelink-mark.svg` را جایگزین کرد یا در build سورس مقدار `VITE_BRAND_MARK` را تعیین کرد. راهنمای کامل branding در [docs/BRANDING.md](docs/BRANDING.md) است.
+بعد theme با نام `my-product` در Keycloak قابل انتخاب است. برای لوگو می‌توان فایل `public/img/corelink-mark.svg` را جایگزین کرد یا در build مقدار `VITE_BRAND_MARK` را تعیین کرد. راهنمای کامل branding در [docs/BRANDING.md](docs/BRANDING.md) است.
 
 در Docker، مقدار `KEYCLOAK_THEME_NAME` داخل build stage نام package/theme را هم تنظیم می‌کند:
 
@@ -69,16 +66,54 @@ docker build \
   -t my-product-keycloak .
 ```
 
+## تغییر متن‌های CoreLink بدون تغییر سورس
+
+متن‌های فعلی CoreLink فقط **default** هستند. مصرف‌کننده theme می‌تواند آن‌ها را در Realm Attributes تغییر دهد. برای هر کلید، نسخه عمومی و نسخه مخصوص زبان پشتیبانی می‌شود؛ نسخه زبان اولویت بالاتری دارد.
+
+نمونه:
+
+```text
+copy.headline.en=Everything your team needs, in one place.
+copy.headline.fa=همه چیزهایی که تیم شما نیاز دارد، یک‌جا.
+copy.description.en=Your own product description.
+copy.description.fa=توضیح اختصاصی محصول شما.
+copy.chip.en=Your own short message
+copy.chip.fa=پیام کوتاه اختصاصی شما
+```
+
+کلیدهای قابل تنظیم:
+
+```text
+copy.eyebrow
+copy.headline
+copy.description
+copy.chip
+copy.featureOne
+copy.featureTwo
+copy.featureThree
+copy.lightMode
+copy.darkMode
+```
+
+برای هرکدام می‌توان پسوند زبان مثل `.fa` یا `.en` گذاشت. اگر override وجود نداشته باشد، متن‌های پیش‌فرض CoreLink نمایش داده می‌شوند.
+
+Branding نیز از قبل از Realm Attributes قابل تغییر است:
+
+```text
+brand.name
+brand.tagline
+brand.logoUrl
+brand.markUrl
+brand.backgroundUrl
+brand.primaryColor
+brand.accentColor
+```
+
+بنابراین کسی که این theme را نصب می‌کند برای تغییر نام، لوگو، رنگ و متن‌های معرفی الزاماً نیاز به fork یا rebuild ندارد.
+
 ## فایل‌های Release
 
-با push کردن tagهایی مثل `v0.1.0`، GitHub Actions این خروجی‌ها را منتشر می‌کند:
-
-- `corelink-26.2-and-above.jar` — فایل نصب مستقیم نسخه رسمی CoreLink روی Keycloak.
-- `SHA256SUMS` — checksum برای بررسی صحت فایل.
-- `ghcr.io/corelinkplatform/identity:<tag>` — image آماده Keycloak همراه theme.
-- `ghcr.io/corelinkplatform/identity:latest` — آخرین image منتشرشده.
-
-راهنمای استفاده از فایل‌های Release و روند انتشار در [docs/RELEASES.md](docs/RELEASES.md) است.
+با push کردن tagهایی مثل `v0.1.0`، GitHub Actions خروجی‌های release را می‌سازد و Docker image آماده Keycloak را در GHCR منتشر می‌کند. جزئیات روند انتشار در [docs/RELEASES.md](docs/RELEASES.md) است.
 
 ## مرزبندی امنیتی repository
 
