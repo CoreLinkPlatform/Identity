@@ -1,21 +1,30 @@
 {
   "name": "corelink",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Reusable Keycloak identity theme with CoreLink defaults",
-  "repository": {"type":"git","url":"https://github.com/CoreLinkPlatform/Identity.git"},
+  "description": "Reusable Keycloak identity suite with CoreLink defaults",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoreLinkPlatform/Identity.git"
+  },
   "type": "module",
   "scripts": {
+    "postinstall": "keycloakify sync-extensions",
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "build": "tsc && vite build",
     "build:keycloak": "npm run build && keycloakify build",
+    "start:keycloak": "keycloakify start-keycloak",
+    "add-story": "keycloakify add-story",
     "format": "prettier . --write",
     "check": "npm run typecheck && npm run build"
   },
   "license": "MIT",
   "dependencies": {
     "@fontsource-variable/vazirmatn": "^5.3.0",
+    "@keycloakify/email-native": "~260007.0.0",
+    "@keycloakify/keycloak-account-ui": "~260700.0.3",
+    "@keycloakify/keycloak-admin-ui": "~260700.0.2",
     "keycloakify": "^11.15.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -29,5 +38,7 @@
     "typescript": "^5.9.2",
     "vite": "^5.4.21"
   },
-  "engines": {"node": ">=20"}
+  "engines": {
+    "node": ">=20"
+  }
 }
