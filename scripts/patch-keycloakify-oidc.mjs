@@ -25,15 +25,17 @@ for (const path of targets) {
   }
 }
 
-const emailOverrides = [
+const fileOverrides = [
   ["overrides/email/template.ftl", "src/email/html/template.ftl"],
   ["overrides/email/theme.properties", "src/email/theme.properties"],
-  ["overrides/email/corelink-mark.svg", "src/email/resources/corelink-mark.svg"]
+  ["overrides/email/corelink-mark.svg", "src/email/resources/corelink-mark.svg"],
+  ["overrides/account/KcAccountUi.tsx", "src/account/KcAccountUi.tsx"],
+  ["overrides/account/Header.tsx", "src/account/root/Header.tsx"]
 ];
 
-for (const [source, destination] of emailOverrides) {
+for (const [source, destination] of fileOverrides) {
   if (!existsSync(source)) {
-    throw new Error(`Missing email override source: ${source}`);
+    throw new Error(`Missing CoreLink override source: ${source}`);
   }
 
   mkdirSync(dirname(destination), { recursive: true });
