@@ -48,16 +48,18 @@ dist_keycloak/corelink-26.2-and-above.jar
 
 این repository به هیچ backend اختصاصی CoreLink وابسته نیست و می‌توان آن را fork و rebrand کرد.
 
+در Keycloakify نام واقعی theme از `package.json:name` گرفته می‌شود. پس در fork خودتان ابتدا نام package را عوض کنید و بعد branding ظاهری را هنگام build بدهید:
+
 ```bash
-KEYCLOAK_THEME_NAME=my-product \
+npm pkg set name=my-product
 VITE_BRAND_NAME="My Product" \
 VITE_BRAND_TAGLINE="Secure access" \
 npm run build:keycloak
 ```
 
-برای لوگو می‌توان فایل `public/img/corelink-mark.svg` را جایگزین کرد یا در build غیر Docker مقدار `VITE_BRAND_MARK` را تعیین کرد. راهنمای تغییر رنگ‌ها و branding در [docs/BRANDING.md](docs/BRANDING.md) است.
+بعد theme با نام `my-product` در Keycloak قابل انتخاب است. برای لوگو می‌توان فایل `public/img/corelink-mark.svg` را جایگزین کرد یا در build سورس مقدار `VITE_BRAND_MARK` را تعیین کرد. راهنمای کامل branding در [docs/BRANDING.md](docs/BRANDING.md) است.
 
-ساخت Docker image اختصاصی:
+در Docker، مقدار `KEYCLOAK_THEME_NAME` داخل build stage نام package/theme را هم تنظیم می‌کند:
 
 ```bash
 docker build \
@@ -71,7 +73,7 @@ docker build \
 
 با push کردن tagهایی مثل `v0.1.0`، GitHub Actions این خروجی‌ها را منتشر می‌کند:
 
-- `<theme-name>-26.2-and-above.jar` — فایل نصب مستقیم theme روی Keycloak.
+- `corelink-26.2-and-above.jar` — فایل نصب مستقیم نسخه رسمی CoreLink روی Keycloak.
 - `SHA256SUMS` — checksum برای بررسی صحت فایل.
 - `ghcr.io/corelinkplatform/identity:<tag>` — image آماده Keycloak همراه theme.
 - `ghcr.io/corelinkplatform/identity:latest` — آخرین image منتشرشده.
