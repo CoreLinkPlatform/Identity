@@ -1,18 +1,25 @@
 # Installation Guide
 
-This guide covers three supported ways to use CoreLink Identity: install the released JAR into an existing Keycloak, run the prebuilt container image, or build a custom-branded image.
+This guide covers three supported ways to use CoreLink Identity: install a released JAR into an existing Keycloak, run the prebuilt container image, or build a custom-branded image.
 
 ## 1. Install a released JAR into existing Keycloak
 
 ### Requirements
 
-- Keycloak 26.2 or newer.
+- A supported Keycloak version.
 - Access to the Keycloak `providers` directory.
 - Permission to restart/rebuild the Keycloak installation.
 
-### Steps
+### Compatibility artifacts
 
-1. Download `corelink-26.2-and-above.jar` and `SHA256SUMS` from the GitHub Release.
+Keycloakify currently produces:
+
+- `keycloak-theme-for-kc-22-to-25.jar` for Keycloak 22–25.
+- `keycloak-theme-for-kc-all-other-versions.jar` for the remaining supported versions, including the current Keycloak 26.x baseline.
+
+### Steps for the current Keycloak 26.x baseline
+
+1. Download `keycloak-theme-for-kc-all-other-versions.jar` and `SHA256SUMS` from the GitHub Release.
 2. Verify the download:
 
 ```bash
@@ -22,7 +29,7 @@ sha256sum -c SHA256SUMS
 3. Copy the JAR into Keycloak:
 
 ```bash
-cp corelink-26.2-and-above.jar /opt/keycloak/providers/corelink-theme.jar
+cp keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/corelink-theme.jar
 ```
 
 4. Rebuild Keycloak:
@@ -46,7 +53,7 @@ Prefer a derived image over runtime mounting:
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:26.7.2 AS builder
-COPY corelink-26.2-and-above.jar /opt/keycloak/providers/corelink-theme.jar
+COPY keycloak-theme-for-kc-all-other-versions.jar /opt/keycloak/providers/corelink-theme.jar
 RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:26.7.2
@@ -58,7 +65,7 @@ CMD ["start", "--optimized"]
 ## 2. Run the released GHCR image
 
 ```bash
-docker pull ghcr.io/corelinkplatform/identity:v0.1.0
+docker pull ghcr.io/corelinkplatform/identity:v1.0.0
 ```
 
 Local smoke test:
@@ -67,7 +74,7 @@ Local smoke test:
 docker run --rm -p 8080:8080 \
   -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
   -e KC_BOOTSTRAP_ADMIN_PASSWORD=change-me \
-  ghcr.io/corelinkplatform/identity:v0.1.0 \
+  ghcr.io/corelinkplatform/identity:v1.0.0 \
   start-dev
 ```
 
@@ -80,15 +87,11 @@ Requirements: Node.js 20+ and npm.
 ```bash
 git clone https://github.com/CoreLinkPlatform/Identity.git
 cd Identity
-npm install
+npm ci
 npm run build:keycloak
 ```
 
-Output:
-
-```text
-dist_keycloak/corelink-26.2-and-above.jar
-```
+Output JARs are written to `dist_keycloak/`.
 
 ## 4. Build a custom-branded fork
 
@@ -101,7 +104,7 @@ VITE_BRAND_TAGLINE="Secure workspace" \
 npm run build:keycloak
 ```
 
-The generated theme will be selectable as `acme`. The JAR artifact is named using the configured artifact/theme name. Replace `public/img/corelink-mark.svg` or set `VITE_BRAND_MARK` to another resource path.
+The generated theme will be selectable as `acme`. Replace `public/img/corelink-mark.svg` or set `VITE_BRAND_MARK` to another resource path.
 
 ## 5. Build a custom Keycloak image
 
