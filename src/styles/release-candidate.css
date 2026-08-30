@@ -1,0 +1,206 @@
+/* Release-candidate polish for Keycloak action pages.
+ * Keep these rules isolated so Keycloak/PatternFly upgrades cannot silently
+ * regress the final authentication UI. */
+
+/* Password visibility: keep the semantic button inside the actual password field. */
+#kc-form-login div:has(> #password),
+#kc-form div:has(> #password),
+#kc-form div:has(> #password-confirm),
+#kc-form div:has(> input[name="password"]),
+#kc-form div:has(> input[name="password-confirm"]),
+#kc-form div:has(> input[name="password-new"]),
+#kc-form div:has(> input[name="password-confirm"]),
+#kc-form .pf-c-input-group,
+#kc-form .pf-v5-c-input-group {
+  position: relative !important;
+}
+
+#kc-form #password,
+#kc-form #password-confirm,
+#kc-form input[name="password"],
+#kc-form input[name="password-new"],
+#kc-form input[name="password-confirm"] {
+  padding-inline-end: 52px !important;
+}
+
+html[dir="rtl"] #kc-form #password,
+html[dir="rtl"] #kc-form #password-confirm,
+html[dir="rtl"] #kc-form input[name="password"],
+html[dir="rtl"] #kc-form input[name="password-new"],
+html[dir="rtl"] #kc-form input[name="password-confirm"] {
+  padding-inline-end: 14px !important;
+  padding-inline-start: 52px !important;
+}
+
+#kc-form button:has(.fa-eye),
+#kc-form button:has(.fa-eye-slash),
+#kc-form .pf-c-input-group button[aria-label],
+#kc-form .pf-v5-c-input-group button[aria-label] {
+  position: absolute !important;
+  top: 50% !important;
+  inset-inline-end: 7px !important;
+  transform: translateY(-50%) !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: 5 !important;
+}
+
+html[dir="rtl"] #kc-form button:has(.fa-eye),
+html[dir="rtl"] #kc-form button:has(.fa-eye-slash),
+html[dir="rtl"] #kc-form .pf-c-input-group button[aria-label],
+html[dir="rtl"] #kc-form .pf-v5-c-input-group button[aria-label] {
+  inset-inline-end: auto !important;
+  inset-inline-start: 7px !important;
+}
+
+/* Google must never inherit the generic mask/currentColor provider icon. */
+#kc-social-providers #social-google::before,
+#kc-social-providers a[id*="google"]::before {
+  content: "" !important;
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex: 0 0 20px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234285F4' d='M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.51 5.51 0 0 1-2.39 3.61v3h3.87c2.27-2.09 3.56-5.17 3.56-8.64Z'/%3E%3Cpath fill='%2334A853' d='M12 24c3.24 0 5.96-1.07 7.94-2.9l-3.87-3a7.18 7.18 0 0 1-10.69-3.78h-4v3.09A12 12 0 0 0 12 24Z'/%3E%3Cpath fill='%23FBBC05' d='M5.38 14.32A7.22 7.22 0 0 1 5 12c0-.81.14-1.6.38-2.32V6.59h-4A12 12 0 0 0 0 12c0 1.94.46 3.78 1.38 5.41l4-3.09Z'/%3E%3Cpath fill='%23EA4335' d='M12 4.77c1.76 0 3.34.61 4.58 1.8l3.44-3.44A11.55 11.55 0 0 0 12 0 12 12 0 0 0 1.38 6.59l4 3.09A7.16 7.16 0 0 1 12 4.77Z'/%3E%3C/svg%3E") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+/* Registration: reduce visual noise and make long forms scan cleanly. */
+body[data-identity-page="register.ftl"] .corelink-form-inner {
+  max-width: 560px;
+}
+
+body[data-identity-page="register.ftl"] #kc-register-form,
+body[data-identity-page="register.ftl"] form {
+  display: grid;
+  gap: 2px;
+}
+
+body[data-identity-page="register.ftl"] .form-group,
+body[data-identity-page="register.ftl"] .pf-c-form__group,
+body[data-identity-page="register.ftl"] .pf-v5-c-form__group {
+  margin-bottom: 14px !important;
+}
+
+body[data-identity-page="register.ftl"] #kc-form-buttons {
+  margin-top: 8px !important;
+}
+
+body[data-identity-page="register.ftl"] #kc-form-buttons input[type="submit"],
+body[data-identity-page="register.ftl"] #kc-form-buttons button[type="submit"] {
+  min-height: 50px !important;
+  width: 100% !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: linear-gradient(90deg, #2f81f7, #20a9df) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 12px 28px rgba(47,129,247,.18) !important;
+}
+
+/* Passkey / required-action pages. */
+body[data-identity-page*="webauthn"] #kc-content-wrapper,
+body[data-identity-page*="passkey"] #kc-content-wrapper {
+  max-width: 560px;
+}
+
+body[data-identity-page*="webauthn"] #kc-form-buttons,
+body[data-identity-page*="passkey"] #kc-form-buttons {
+  display: grid !important;
+  gap: 10px !important;
+  margin-top: 18px !important;
+}
+
+body[data-identity-page*="webauthn"] input[type="submit"],
+body[data-identity-page*="webauthn"] button[type="submit"],
+body[data-identity-page*="passkey"] input[type="submit"],
+body[data-identity-page*="passkey"] button[type="submit"],
+#authenticateWebAuthnButton {
+  min-height: 50px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: linear-gradient(90deg, #2f81f7, #20a9df) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 12px 28px rgba(47,129,247,.17) !important;
+}
+
+body[data-identity-page*="webauthn"] input[type="button"],
+body[data-identity-page*="webauthn"] button[name*="cancel"],
+body[data-identity-page*="passkey"] input[type="button"],
+body[data-identity-page*="passkey"] button[name*="cancel"] {
+  min-height: 46px !important;
+  border: 1px solid #cdd9e6 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  color: #18324f !important;
+  font-weight: 700 !important;
+}
+
+/* IDP-link / existing-account pages: turn raw browser buttons into a clear CTA row. */
+body[data-identity-page*="idp"] #kc-form-buttons,
+body[data-identity-page*="link"] #kc-form-buttons,
+body[data-identity-page*="confirm"] #kc-form-buttons {
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin-top: 16px !important;
+}
+
+body[data-identity-page*="idp"] #kc-form-buttons button,
+body[data-identity-page*="idp"] #kc-form-buttons input,
+body[data-identity-page*="link"] #kc-form-buttons button,
+body[data-identity-page*="link"] #kc-form-buttons input,
+body[data-identity-page*="confirm"] #kc-form-buttons button,
+body[data-identity-page*="confirm"] #kc-form-buttons input {
+  min-height: 46px !important;
+  padding: 0 18px !important;
+  border-radius: 12px !important;
+  border: 1px solid #cbd8e6 !important;
+  background: #fff !important;
+  color: #18324f !important;
+  font-weight: 750 !important;
+  box-shadow: 0 6px 16px rgba(15,35,55,.05) !important;
+}
+
+body[data-identity-page*="idp"] #kc-form-buttons button:last-child,
+body[data-identity-page*="idp"] #kc-form-buttons input:last-child,
+body[data-identity-page*="link"] #kc-form-buttons button:last-child,
+body[data-identity-page*="link"] #kc-form-buttons input:last-child,
+body[data-identity-page*="confirm"] #kc-form-buttons button:last-child,
+body[data-identity-page*="confirm"] #kc-form-buttons input:last-child {
+  border-color: transparent !important;
+  background: linear-gradient(90deg, #2f81f7, #20a9df) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 640px) {
+  body[data-identity-page*="idp"] #kc-form-buttons,
+  body[data-identity-page*="link"] #kc-form-buttons,
+  body[data-identity-page*="confirm"] #kc-form-buttons {
+    display: grid !important;
+  }
+
+  body[data-identity-page*="idp"] #kc-form-buttons > *,
+  body[data-identity-page*="link"] #kc-form-buttons > *,
+  body[data-identity-page*="confirm"] #kc-form-buttons > * {
+    width: 100% !important;
+  }
+}
