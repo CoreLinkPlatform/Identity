@@ -11,10 +11,13 @@ import { browserRuntimeFreeze } from "oidc-spa/browser-runtime-freeze";
  * subsequently hit `lifespanInSeconds must be positive` in DPoP replay
  * validation. Keep the browser runtime hardening but use the standard OIDC
  * authorization-code flow until that compatibility issue is resolved.
+ *
+ * Force full-page restoration as well. This deliberately avoids reusing SPA
+ * auth state created by older DPoP-enabled bundles after a theme upgrade.
  */
 const { shouldLoadApp } = oidcEarlyInit({
   BASE_URL: location.pathname,
-  sessionRestorationMethod: import.meta.env.DEV ? "full page redirect" : "auto",
+  sessionRestorationMethod: "full page redirect",
   securityDefenses: {
     ...browserRuntimeFreeze({ excludes: ["fetch"] })
   }
