@@ -3,7 +3,13 @@ name: Identity CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
 
 permissions:
   contents: read
@@ -22,15 +28,16 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 20
+          package-manager-cache: false
 
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
-      - name: Install Maven
+      - name: Ensure Maven is available
         run: |
           if ! command -v mvn >/dev/null 2>&1; then
             sudo apt-get update
-            sudo apt-get install -y maven
+            sudo apt-get install -y --no-install-recommends maven
           fi
           mvn -version
 
@@ -38,7 +45,7 @@ jobs:
         id: install
         run: |
           set -o pipefail
-          npm install 2>&1 | tee ci-install.log
+          npm install --prefer-offline --no-audit --no-fund 2>&1 | tee ci-install.log
 
       - name: Typecheck and web build
         id: check
@@ -55,14 +62,22 @@ jobs:
       - name: Inspect Keycloak build output
         run: find dist_keycloak -maxdepth 2 -type f -print
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Validate production Docker image
         id: docker
-        run: |
-          set -o pipefail
-          docker build --pull -t corelink-identity:ci . 2>&1 | tee ci-docker.log
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: corelink-identity:ci
+          cache-from: type=gha,scope=identity-image-ci
+          cache-to: type=gha,mode=min,scope=identity-image-ci
 
       - name: Upload diagnostics
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v7.0.1
         with:
           name: identity-ci-diagnostics
@@ -70,7 +85,6 @@ jobs:
             ci-install.log
             ci-check.log
             ci-theme.log
-            ci-docker.log
           if-no-files-found: ignore
 
       - name: Upload theme JAR
