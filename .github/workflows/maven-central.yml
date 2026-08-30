@@ -79,7 +79,7 @@ jobs:
           VERSION="${RELEASE_REF#v}"
           AUTH="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
           DEPLOYMENT_NAME="CoreLink Identity ${RELEASE_REF}"
-          ENCODED_NAME="$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["DEPLOYMENT_NAME"], safe=""))' DEPLOYMENT_NAME="$DEPLOYMENT_NAME")"
+          ENCODED_NAME="$(DEPLOYMENT_NAME="$DEPLOYMENT_NAME" python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["DEPLOYMENT_NAME"], safe=""))')"
           UPLOAD_URL="https://central.sonatype.com/api/v1/publisher/upload?name=${ENCODED_NAME}&publishingType=${PUBLISHING_TYPE}"
 
           DEPLOYMENT_ID="$(curl --fail-with-body --silent --show-error \
