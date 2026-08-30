@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Release tag to publish, e.g. v0.1.0"
+        description: "Release tag to publish, e.g. v1.0.0"
         required: true
-        default: "v0.1.0"
+        default: "v1.0.0"
       publishing_type:
         description: "USER_MANAGED validates first; AUTOMATIC publishes after validation"
         required: true
@@ -15,18 +15,21 @@ on:
         options:
           - USER_MANAGED
           - AUTOMATIC
-
-env:
-  RELEASE_REF: ${{ inputs.ref }}
-  PUBLISHING_TYPE: ${{ inputs.publishing_type }}
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
   publish:
+    if: "${{ github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'maven-v1.0.0' }}"
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 30
+    env:
+      RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'v1.0.0' }}
+      PUBLISHING_TYPE: ${{ github.event_name == 'workflow_dispatch' && inputs.publishing_type || 'AUTOMATIC' }}
     steps:
       - uses: actions/checkout@v7.0.1
 
