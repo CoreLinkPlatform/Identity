@@ -48,16 +48,18 @@ Install it into an existing Keycloak instance by copying the JAR to `/opt/keyclo
 
 No CoreLink backend is required. The repository can be forked and rebranded independently.
 
+Keycloakify derives the actual Keycloak theme name from `package.json:name`. For a fork, set that first, then build with your visible branding:
+
 ```bash
-KEYCLOAK_THEME_NAME=my-product \
+npm pkg set name=my-product
 VITE_BRAND_NAME="My Product" \
 VITE_BRAND_TAGLINE="Secure access" \
 npm run build:keycloak
 ```
 
-Replace `public/img/corelink-mark.svg` or set `VITE_BRAND_MARK` when building outside Docker. Colors and layout are documented in [docs/BRANDING.md](docs/BRANDING.md).
+The resulting theme is selectable as `my-product` in Keycloak. Replace `public/img/corelink-mark.svg` or set `VITE_BRAND_MARK` when building from source. Colors and layout are documented in [docs/BRANDING.md](docs/BRANDING.md).
 
-For Docker:
+For Docker, `KEYCLOAK_THEME_NAME` updates the package/theme name inside the build stage automatically:
 
 ```bash
 docker build \
@@ -71,7 +73,7 @@ docker build \
 
 On tags matching `v*`, GitHub Actions publishes:
 
-- `<theme-name>-26.2-and-above.jar` — installable Keycloak theme.
+- `corelink-26.2-and-above.jar` — installable Keycloak theme for official CoreLink releases.
 - `SHA256SUMS` — integrity checksum file.
 - `ghcr.io/corelinkplatform/identity:<tag>` — Keycloak image with the CoreLink theme pre-installed.
 - `ghcr.io/corelinkplatform/identity:latest` — latest tagged image.
