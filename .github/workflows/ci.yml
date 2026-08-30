@@ -26,6 +26,14 @@ jobs:
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
+      - name: Install Maven
+        run: |
+          if ! command -v mvn >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y maven
+          fi
+          mvn -version
+
       - name: Install dependencies
         id: install
         continue-on-error: true
@@ -48,6 +56,10 @@ jobs:
         run: |
           set -o pipefail
           npm run build:keycloak 2>&1 | tee ci-theme.log
+
+      - name: Inspect Keycloak build output
+        if: steps.theme.outcome == 'success'
+        run: find dist_keycloak -maxdepth 2 -type f -print
 
       - name: Upload diagnostics
         if: always()
