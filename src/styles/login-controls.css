@@ -73,6 +73,44 @@
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3l18 18'/%3E%3Cpath d='M10.6 6.15A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a17.8 17.8 0 0 1-2.15 2.85M14.1 14.1A3 3 0 0 1 9.9 9.9M6.4 6.4C3.8 8.15 2.5 12 2.5 12s3.5 6 9.5 6a10.9 10.9 0 0 0 4-.75'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
+/* Authentication errors. With doUseDefaultCss=false Keycloakify can render
+ * field/global messages without the PatternFly styles that normally make
+ * them visible. Treat both message paths as first-class CoreLink alerts. */
+#input-error,
+.kc-feedback-text,
+.alert-error .pf-c-alert__title,
+.pf-m-danger .pf-c-alert__title {
+  display: block !important;
+  margin-top: 8px !important;
+  color: #ff8585 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.65 !important;
+}
+
+#input-error {
+  padding: 10px 12px !important;
+  border: 1px solid rgba(255, 107, 107, .35) !important;
+  border-radius: 10px !important;
+  background: rgba(255, 107, 107, .08) !important;
+}
+
+.alert-error,
+.pf-m-danger {
+  display: block !important;
+  margin-bottom: 16px !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(255, 107, 107, .38) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 107, 107, .08) !important;
+  color: #ff8585 !important;
+}
+
+.alert-error .pf-c-alert__icon,
+.pf-m-danger .pf-c-alert__icon {
+  display: none !important;
+}
+
 /* Social provider icons. Keycloakify provides stable ids: social-<alias>. */
 #kc-social-providers a > i {
   display: none !important;
