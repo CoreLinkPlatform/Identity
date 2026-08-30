@@ -6,6 +6,10 @@ import { useI18n } from "./i18n";
 
 const UserProfileFormFields = lazy(() => import("keycloakify/login/UserProfileFormFields"));
 
+const brandName = import.meta.env.VITE_BRAND_NAME || "CoreLink";
+const brandTagline = import.meta.env.VITE_BRAND_TAGLINE || "Secure connected intelligence";
+const brandMark = import.meta.env.VITE_BRAND_MARK || "img/corelink-mark.svg";
+
 export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   const { i18n } = useI18n({ kcContext });
   const lang = i18n.currentLanguage.languageTag;
@@ -14,14 +18,14 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = isRtl ? "rtl" : "ltr";
-    document.body.dataset.corelinkPage = kcContext.pageId;
+    document.body.dataset.identityPage = kcContext.pageId;
   }, [lang, isRtl, kcContext.pageId]);
 
   return (
     <Suspense>
-      <div className="corelink-brand-bar" aria-hidden="true">
-        <img src={`${kcContext.url.resourcesPath}/img/corelink-mark.svg`} alt="" />
-        <span>CoreLink</span>
+      <div className="corelink-brand-bar">
+        <img src={`${kcContext.url.resourcesPath}/${brandMark}`} alt={`${brandName} logo`} />
+        <span>{brandName}</span>
       </div>
       <DefaultPage
         kcContext={kcContext}
@@ -33,7 +37,7 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
         doMakeUserConfirmPassword={true}
       />
       <footer className="corelink-auth-footer">
-        <span>CoreLink Identity</span><span>•</span><span>Secure connected intelligence</span>
+        <span>{brandName} Identity</span><span>•</span><span>{brandTagline}</span>
       </footer>
     </Suspense>
   );
