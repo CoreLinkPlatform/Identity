@@ -11,7 +11,7 @@
   "scripts": {
     "sync:extensions": "node scripts/sync-extensions-preserving-overrides.mjs",
     "verify:extensions": "node scripts/verify-extension-overrides.mjs",
-    "postinstall": "npm run sync:extensions && npm run verify:extensions",
+    "prepare:extensions": "npm run sync:extensions && npm run verify:extensions",
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "build": "tsc && vite build",
