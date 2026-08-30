@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { KcPage } from "./kc.gen";
 import "./styles/corelink.css";
 import "./styles/login-controls.css";
+import "./styles/password-toggle-fix.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
