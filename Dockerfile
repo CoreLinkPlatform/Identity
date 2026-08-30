@@ -16,11 +16,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends openjdk-17-jdk-headless maven \
     && rm -rf /var/lib/apt/lists/*
 
-# Keycloakify's postinstall hook (`sync-extensions`) needs the Vite config and
-# project sources to discover optional extensions such as email-native.
-# Install only after the complete project has been copied into the build stage.
 COPY . .
-RUN npm install
+RUN npm install \
+    && npm run prepare:extensions
 
 RUN npm pkg set name="${KEYCLOAK_THEME_NAME}" \
     && npm run build:keycloak \
