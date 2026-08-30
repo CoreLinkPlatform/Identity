@@ -1,0 +1,73 @@
+name: Identity CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: identity-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-theme:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Use pre-installed Temurin JDK 17
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        id: install
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm install 2>&1 | tee ci-install.log
+
+      - name: Typecheck and web build
+        id: check
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run check 2>&1 | tee ci-check.log
+
+      - name: Build Keycloak theme
+        id: theme
+        if: steps.install.outcome == 'success' && steps.check.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm run build:keycloak 2>&1 | tee ci-theme.log
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: identity-ci-diagnostics
+          path: |
+            ci-install.log
+            ci-check.log
+            ci-theme.log
+          if-no-files-found: ignore
+
+      - name: Upload theme JAR
+        if: steps.theme.outcome == 'success'
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: corelink-keycloak-theme
+          path: dist_keycloak/*.jar
+          if-no-files-found: error
+
+      - name: Fail if validation failed
+        if: steps.install.outcome != 'success' || steps.check.outcome != 'success' || steps.theme.outcome != 'success'
+        run: exit 1
