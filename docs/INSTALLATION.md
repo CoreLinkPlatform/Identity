@@ -12,7 +12,7 @@ This guide covers three supported ways to use CoreLink Identity: install the rel
 
 ### Steps
 
-1. Download the release JAR named `corelink-26.2-and-above.jar` and `SHA256SUMS` from the GitHub Release.
+1. Download `corelink-26.2-and-above.jar` and `SHA256SUMS` from the GitHub Release.
 2. Verify the download:
 
 ```bash
@@ -25,24 +25,24 @@ sha256sum -c SHA256SUMS
 cp corelink-26.2-and-above.jar /opt/keycloak/providers/corelink-theme.jar
 ```
 
-4. Rebuild the optimized Keycloak installation:
+4. Rebuild Keycloak:
 
 ```bash
 /opt/keycloak/bin/kc.sh build
 ```
 
 5. Restart Keycloak.
-6. Open the Admin Console and select:
+6. Open Admin Console and select:
 
 ```text
 Realm settings → Themes → Login theme → corelink
 ```
 
-7. Save and open a login flow for that realm to verify the theme.
+7. Save and exercise a real login flow for that realm.
 
-### Docker-based existing Keycloak
+### Existing Docker-based Keycloak
 
-If Keycloak already runs as a container, build a tiny derived image instead of mounting the JAR at runtime:
+Prefer a derived image over runtime mounting:
 
 ```dockerfile
 FROM quay.io/keycloak/keycloak:26.7.2 AS builder
@@ -57,13 +57,11 @@ CMD ["start", "--optimized"]
 
 ## 2. Run the released GHCR image
 
-The tagged image already contains the CoreLink theme and an optimized Keycloak build.
-
 ```bash
 docker pull ghcr.io/corelinkplatform/identity:v0.1.0
 ```
 
-Example local development run:
+Local smoke test:
 
 ```bash
 docker run --rm -p 8080:8080 \
@@ -73,15 +71,11 @@ docker run --rm -p 8080:8080 \
   start-dev
 ```
 
-For production, do not use `start-dev`. Provide a supported database, hostname, TLS/proxy configuration and secrets through your deployment system.
+For production, do not use `start-dev`. Supply a production database, hostname, TLS/proxy configuration and secrets through your deployment system.
 
-## 3. Build from source
+## 3. Build the CoreLink theme from source
 
-### Requirements
-
-- Node.js 20+
-- npm
-- Docker only if you want the full Keycloak image
+Requirements: Node.js 20+ and npm.
 
 ```bash
 git clone https://github.com/CoreLinkPlatform/Identity.git
@@ -96,24 +90,22 @@ Output:
 dist_keycloak/corelink-26.2-and-above.jar
 ```
 
-## 4. Build a custom-branded theme
+## 4. Build a custom-branded fork
+
+Keycloakify derives the actual theme identifier from `package.json:name`. Change it in your fork before building:
 
 ```bash
-KEYCLOAK_THEME_NAME=acme \
+npm pkg set name=acme
 VITE_BRAND_NAME="Acme" \
 VITE_BRAND_TAGLINE="Secure workspace" \
 npm run build:keycloak
 ```
 
-Expected output:
-
-```text
-dist_keycloak/acme-26.2-and-above.jar
-```
-
-Then select `acme` as the Login theme in the Realm settings.
+The generated theme will be selectable as `acme`. The JAR artifact is named using the configured artifact/theme name. Replace `public/img/corelink-mark.svg` or set `VITE_BRAND_MARK` to another resource path.
 
 ## 5. Build a custom Keycloak image
+
+The Dockerfile performs the package-name change automatically from `KEYCLOAK_THEME_NAME`:
 
 ```bash
 docker build \
@@ -126,33 +118,33 @@ docker build \
 
 ## 6. Realm configuration
 
-This repository does not create realms or clients. After installing the theme, configure your realm normally and select the theme under Realm settings. Production realm exports, client secrets and database credentials should live in your deployment/configuration repository, not in this theme repository.
+This repository does not create realms or clients. Configure the realm normally and select the installed login theme under Realm settings. Production realm exports, client secrets and database credentials belong in a separate deployment/configuration repository.
 
 ## 7. Upgrade procedure
 
-1. Read the release notes.
-2. Back up realm configuration and the Keycloak database according to your normal operations procedure.
+1. Read release notes.
+2. Back up realm configuration and the Keycloak database according to your operations policy.
 3. Replace the old theme JAR or container image with the new tagged version.
-4. Run `kc.sh build` when installing a JAR manually.
+4. Run `kc.sh build` for manual JAR installation.
 5. Restart Keycloak.
-6. Verify login, password reset, email verification, OTP/TOTP and any custom required actions.
+6. Verify login, registration, password reset, email verification, OTP/TOTP and custom required actions.
 
-Do not deploy multiple versions of the same theme JAR into `providers/` at the same time.
+Do not deploy multiple versions of the same theme JAR into `providers/` simultaneously.
 
 ## 8. Troubleshooting
 
 ### Theme is not visible
 
-Confirm the JAR exists under `/opt/keycloak/providers/`, rerun `kc.sh build`, restart Keycloak and ensure the theme name matches the build-time `KEYCLOAK_THEME_NAME` value.
+Confirm the JAR is under `/opt/keycloak/providers/`, rerun `kc.sh build`, restart Keycloak and make sure the selected theme name matches the `package.json:name` used during the build (or `KEYCLOAK_THEME_NAME` for the provided Dockerfile).
 
 ### Old styles are still shown
 
-Restart Keycloak and clear browser cache. During theme development, avoid relying on production cache behaviour.
+Restart Keycloak and clear browser cache. Production theme caching can hide recent development changes.
 
 ### Persian is not shown
 
-Enable internationalization for the realm and include Persian (`fa`) in supported locales. The UI automatically sets `dir=rtl` for Persian and Arabic.
+Enable realm internationalization and add Persian (`fa`) to Supported locales. The UI automatically applies RTL direction for Persian and Arabic.
 
 ### Container starts but production configuration fails
 
-The image only packages Keycloak and the theme. Database, hostname, proxy/TLS, realm provisioning and secrets are deployment concerns and must be supplied separately.
+The image packages Keycloak and the theme only. Database, hostname, proxy/TLS, realm provisioning and secrets must be supplied by the deployment layer.
