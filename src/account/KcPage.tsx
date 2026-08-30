@@ -11,7 +11,7 @@ export default function KcPage(props: { kcContext: KcContext }) {
 
   const { shouldLoadApp } = oidcEarlyInit({
     BASE_URL: kcContext.baseUrl.path,
-    sessionRestorationMethod: import.meta.env.DEV ? "full page redirect" : "auto",
+    sessionRestorationMethod: "full page redirect",
     securityDefenses: {
       ...browserRuntimeFreeze({ excludes: ["fetch"] })
     }
