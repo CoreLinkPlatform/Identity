@@ -17,7 +17,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
-RUN npm install \
+RUN npm ci \
     && npm run prepare:extensions
 
 RUN npm pkg set name="${KEYCLOAK_THEME_NAME}" \
