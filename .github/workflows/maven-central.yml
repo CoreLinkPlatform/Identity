@@ -1,6 +1,10 @@
 name: Maven Central
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/maven-central.yml"
   workflow_dispatch:
     inputs:
       ref:
@@ -15,6 +19,10 @@ on:
         options:
           - USER_MANAGED
           - AUTOMATIC
+
+env:
+  RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'v0.1.0' }}
+  PUBLISHING_TYPE: ${{ github.event_name == 'workflow_dispatch' && inputs.publishing_type || 'USER_MANAGED' }}
 
 permissions:
   contents: read
@@ -41,7 +49,6 @@ jobs:
       - name: Download released Keycloak theme JAR
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_REF: ${{ inputs.ref }}
         run: |
           mkdir -p dist_keycloak
           gh release download "$RELEASE_REF" \
@@ -62,15 +69,13 @@ jobs:
       - name: Build signed Central bundle
         env:
           GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        run: bash scripts/build-central-bundle.sh "${{ inputs.ref }}"
+        run: bash scripts/build-central-bundle.sh "$RELEASE_REF"
 
       - name: Upload deployment to Maven Central
         id: central
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-          PUBLISHING_TYPE: ${{ inputs.publishing_type }}
-          RELEASE_REF: ${{ inputs.ref }}
         run: |
           test -n "$CENTRAL_USERNAME"
           test -n "$CENTRAL_PASSWORD"
@@ -110,7 +115,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: maven-central-${{ inputs.ref }}
+          name: maven-central-${{ env.RELEASE_REF }}
           path: |
             central-bundle.zip
             central-status.json
