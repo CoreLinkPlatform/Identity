@@ -15,21 +15,18 @@ on:
         options:
           - USER_MANAGED
           - AUTOMATIC
-  push:
-    branches:
-      - main
+
+env:
+  RELEASE_REF: ${{ inputs.ref }}
+  PUBLISHING_TYPE: ${{ inputs.publishing_type }}
 
 permissions:
   contents: read
 
 jobs:
   publish:
-    if: "${{ github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'maven-v1.0.0' }}"
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 30
-    env:
-      RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'v1.0.0' }}
-      PUBLISHING_TYPE: ${{ github.event_name == 'workflow_dispatch' && inputs.publishing_type || 'AUTOMATIC' }}
     steps:
       - uses: actions/checkout@v7.0.1
 
