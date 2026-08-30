@@ -18,6 +18,7 @@ const defaultBackgroundUrl = `${import.meta.env.BASE_URL}${defaultBackgroundPath
 
 type ColorMode = "light" | "dark";
 type RealmWithAttributes = KcContext["realm"] & { attributes?: Record<string, string> };
+type ContextWithProperties = KcContext & { properties?: Record<string, string> };
 
 type Brand = {
   name: string;
@@ -56,18 +57,52 @@ function resolveAssetUrl(value: string | undefined, fallback: string): string {
   return `${import.meta.env.BASE_URL}${candidate}`;
 }
 
+function firstNonBlank(...values: Array<string | undefined>): string | undefined {
+  return values.map(value => value?.trim()).find((value): value is string => Boolean(value));
+}
+
 function readBrand(kcContext: KcContext): Brand {
   const attributes = (kcContext.realm as RealmWithAttributes).attributes ?? {};
-  const logoValue = attributes["brand.logoUrl"]?.trim();
+  const properties = (kcContext as ContextWithProperties).properties ?? {};
+
+  const logoValue = firstNonBlank(
+    attributes["brand.logoUrl"],
+    properties.CORELINK_BRAND_LOGO_URL
+  );
 
   return {
-    name: attributes["brand.name"]?.trim() || defaultBrandName,
-    tagline: attributes["brand.tagline"]?.trim() || defaultBrandTagline,
+    name:
+      firstNonBlank(
+        attributes["brand.name"],
+        properties.CORELINK_BRAND_NAME,
+        defaultBrandName
+      ) ?? "CoreLink",
+    tagline:
+      firstNonBlank(
+        attributes["brand.tagline"],
+        properties.CORELINK_BRAND_TAGLINE,
+        defaultBrandTagline
+      ) ?? "Secure connected intelligence",
     logoUrl: logoValue ? resolveAssetUrl(logoValue, defaultBrandMarkUrl) : undefined,
-    markUrl: resolveAssetUrl(attributes["brand.markUrl"], defaultBrandMarkUrl),
-    backgroundUrl: resolveAssetUrl(attributes["brand.backgroundUrl"], defaultBackgroundUrl),
-    primaryColor: attributes["brand.primaryColor"]?.trim() || undefined,
-    accentColor: attributes["brand.accentColor"]?.trim() || undefined
+    markUrl: resolveAssetUrl(
+      firstNonBlank(attributes["brand.markUrl"], properties.CORELINK_BRAND_MARK_URL),
+      defaultBrandMarkUrl
+    ),
+    backgroundUrl: resolveAssetUrl(
+      firstNonBlank(
+        attributes["brand.backgroundUrl"],
+        properties.CORELINK_BRAND_BACKGROUND_URL
+      ),
+      defaultBackgroundUrl
+    ),
+    primaryColor: firstNonBlank(
+      attributes["brand.primaryColor"],
+      properties.CORELINK_BRAND_PRIMARY_COLOR
+    ),
+    accentColor: firstNonBlank(
+      attributes["brand.accentColor"],
+      properties.CORELINK_BRAND_ACCENT_COLOR
+    )
   };
 }
 
