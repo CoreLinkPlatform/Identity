@@ -19,11 +19,8 @@ jobs:
         with:
           node-version: 20
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: maven
+      - name: Use pre-installed Temurin JDK 17
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: npm install
