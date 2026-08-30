@@ -2,13 +2,16 @@ import { lazy, Suspense, useEffect } from "react";
 import DefaultPage from "keycloakify/login/DefaultPage";
 import Template from "keycloakify/login/Template";
 import type { KcContext } from "./KcContext";
+import { InteractiveBackground } from "./InteractiveBackground";
 import { useI18n } from "./i18n";
+import "./InteractiveBackground.css";
 
 const UserProfileFormFields = lazy(() => import("keycloakify/login/UserProfileFormFields"));
 
 const brandName = import.meta.env.VITE_BRAND_NAME || "CoreLink";
 const brandTagline = import.meta.env.VITE_BRAND_TAGLINE || "Secure connected intelligence";
 const brandMark = import.meta.env.VITE_BRAND_MARK || "img/corelink-mark.svg";
+const backgroundImage = import.meta.env.VITE_IDENTITY_BACKGROUND || "img/identity-topography.webp";
 
 export default function KcPage({ kcContext }: { kcContext: KcContext }) {
   const { i18n } = useI18n({ kcContext });
@@ -23,6 +26,7 @@ export default function KcPage({ kcContext }: { kcContext: KcContext }) {
 
   return (
     <Suspense>
+      <InteractiveBackground imageUrl={`${kcContext.url.resourcesPath}/${backgroundImage}`} />
       <div className="corelink-brand-bar">
         <img src={`${kcContext.url.resourcesPath}/${brandMark}`} alt={`${brandName} logo`} />
         <span>{brandName}</span>
