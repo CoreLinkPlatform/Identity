@@ -1,5 +1,12 @@
 # CoreLink Identity
 
+[![CI](https://github.com/CoreLinkPlatform/Identity/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/CoreLinkPlatform/Identity/actions/workflows/ci.yml)
+[![Release](https://github.com/CoreLinkPlatform/Identity/actions/workflows/release.yml/badge.svg)](https://github.com/CoreLinkPlatform/Identity/actions/workflows/release.yml)
+[![Maven Central](https://github.com/CoreLinkPlatform/Identity/actions/workflows/maven-central.yml/badge.svg)](https://github.com/CoreLinkPlatform/Identity/actions/workflows/maven-central.yml)
+[![Latest release](https://img.shields.io/github/v/release/CoreLinkPlatform/Identity?display_name=tag&sort=semver)](https://github.com/CoreLinkPlatform/Identity/releases/latest)
+[![Keycloak 26.7.2](https://img.shields.io/badge/Keycloak-26.7.2-blue)](https://www.keycloak.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A reusable, production-oriented Keycloak UI theme suite built with **Keycloakify**, **React**, **TypeScript**, and **Vite**. It ships with CoreLink branding by default, but the theme name, visible brand name, tagline, logo asset, colors, copy and translations can be replaced for another product.
 
 [راهنمای فارسی](README.fa.md) · [Installation](docs/INSTALLATION.md) · [Branding](docs/BRANDING.md) · [Releases](docs/RELEASES.md)
