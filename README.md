@@ -86,7 +86,7 @@ On tags matching `v*`, GitHub Actions publishes:
 - `keycloak-theme-for-kc-all-other-versions.jar`
 - `SHA256SUMS`
 - `ghcr.io/corelinkplatform/identity:<tag>`
-- `ghcr.io/corelinkplatform/identity:latest`
+- `ghcr.io/corelinkplatform/identity:latest` (stable releases only; prereleases use versioned tags)
 
 The release workflow rejects a tag whose semantic version does not match `package.json:version`.
 

@@ -31,6 +31,14 @@ jobs:
           echo "package version: ${PACKAGE_VERSION}"
           test "${TAG_VERSION}" = "${PACKAGE_VERSION}"
 
+      - name: Test release channel classification
+        run: node --test scripts/release-channel.test.cjs
+
+      - name: Resolve release channel and image tags
+        id: channel
+        shell: bash
+        run: node scripts/release-channel.cjs "${GITHUB_REF_NAME#v}"
+
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
@@ -77,9 +85,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/corelinkplatform/identity:${{ github.ref_name }}
-            ghcr.io/corelinkplatform/identity:latest
+          tags: ${{ steps.channel.outputs.image_tags }}
           labels: |
             org.opencontainers.image.source=https://github.com/CoreLinkPlatform/Identity
             org.opencontainers.image.version=${{ github.ref_name }}
@@ -91,4 +97,11 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" dist_keycloak/*.jar SHA256SUMS --generate-notes --title "CoreLink Identity ${GITHUB_REF_NAME}"
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_args=(--generate-notes --title "CoreLink Identity ${GITHUB_REF_NAME}")
+          if [[ "${{ steps.channel.outputs.prerelease }}" == "true" ]]; then
+            release_args+=(--prerelease)
+          fi
+          gh release create "${GITHUB_REF_NAME}" dist_keycloak/*.jar SHA256SUMS "${release_args[@]}"

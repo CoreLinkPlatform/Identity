@@ -24,6 +24,9 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Test stable and prerelease publication channels
+        run: node --test scripts/release-channel.test.cjs
+
       - name: Use pre-installed Temurin JDK 17
         run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
 
