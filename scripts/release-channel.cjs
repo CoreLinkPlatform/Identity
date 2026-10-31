@@ -5,9 +5,10 @@ const fs = require("node:fs");
 const IMAGE = "ghcr.io/corelinkplatform/identity";
 
 // A version is supplied without its leading v; tag/package equality is checked
-// separately by the release workflow.
+// separately by the release workflow. Build metadata (+...) is disallowed
+// because Docker/OCI image tags cannot contain '+'.
 function classifyVersion(version) {
-  const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/.exec(version || "");
+  const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/.exec(version || "");
   if (!match) {
     throw new Error(`Invalid SemVer version: ${version}`);
   }
