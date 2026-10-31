@@ -12,9 +12,11 @@ For a tag such as `v1.0.0`, the Release workflow publishes:
 | `keycloak-theme-for-kc-all-other-versions.jar` | Keycloakify compatibility artifact for the remaining supported versions, including the current 26.x baseline. |
 | `SHA256SUMS` | Verify the integrity of downloaded JAR files. |
 | `ghcr.io/corelinkplatform/identity:v1.0.0` | Versioned Keycloak image containing the theme. |
-| `ghcr.io/corelinkplatform/identity:latest` | Convenience image pointing at the latest tagged release. |
+| `ghcr.io/corelinkplatform/identity:latest` | Convenience image pointing at the latest **stable** tagged release; prereleases never overwrite it. |
 
 The GitHub source archives (`Source code (zip)` and `Source code (tar.gz)`) are generated automatically by GitHub.
+
+GitHub Releases follow the SemVer maturity channel: tags such as `v1.1.0-alpha.1`, `v1.1.0-beta.2`, and `v1.1.0-rc.3` are created as **prereleases**; stable tags such as `v1.1.0` are normal releases. Every release publishes a versioned GHCR image, but only stable releases update `latest`. This policy is enforced and tested by `scripts/release-channel.cjs` and the CI/release workflows. Existing historical release metadata is not rewritten by this change.
 
 ## Install from a release JAR
 
